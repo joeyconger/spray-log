@@ -223,24 +223,34 @@ function WeatherBox({weather}) {
 // No AI needed — paste text and we parse it client-side with simple rules,
 // OR manually enter jobs one by one.
 function parseJobsFromText(text) {
-  const lines = text.split(/\n/).map(l=>l.trim()).filter(Boolean);
-  const jobs  = [];
-  for (const line of lines) {
-    // Try to split on tab or multiple spaces
-    const parts = line.split(/\t|  +/);
-    if (parts.length >= 2) {
-      jobs.push({
-        code:       parts[0]||"",
-        name:       parts[1]||"",
-        address:    parts[2]||"",
-        miles:      parts[3]||"",
-        linearFeet: parts[4]||"",
-        acreage:    parts[5]||"",
-      });
-    } else if (parts.length === 1 && line.length > 3) {
-      // Single column — treat as name only
-      jobs.push({ code:"", name:line, address:"", miles:"", linearFeet:"", acreage:"" });
-    }
+  // Skip header/junk lines
+  const SKIP = /^(maintenance trails|date|name|address|miles|linear feet|linear ft|acreage|\d+|\s*✕\s*)$/i;
+  // Address: starts with a number followed by letters (street address)
+  const IS_ADDR = /^\d+\s+[a-z]/i;
+  // Number-only (miles or linear feet): decimal or integer
+  const IS_NUM = /^\d+(\.\d+)?$/;
+
+  const raw = text.split(/\n/).map(l => l.replace(/\t.*/, "").trim()).filter(l => l && !SKIP.test(l));
+
+  const jobs = [];
+  let i = 0;
+  while (i < raw.length) {
+    const line = raw[i];
+    // A job name: not an address, not a pure number, has letters, at least 3 chars
+    const isName = !IS_ADDR.test(line) && !IS_NUM.test(line) && /[a-zA-Z]/.test(line) && line.length >= 3;
+    if (!isName) { i++; continue; }
+
+    const job = { code:"", name:line, address:"", miles:"", linearFeet:"", acreage:"" };
+    i++;
+
+    // Next line: address?
+    if (i < raw.length && IS_ADDR.test(raw[i])) { job.address = raw[i]; i++; }
+    // Next line: miles (small decimal)?
+    if (i < raw.length && IS_NUM.test(raw[i]) && parseFloat(raw[i]) < 50) { job.miles = raw[i]; i++; }
+    // Next line: linear feet (larger number)?
+    if (i < raw.length && IS_NUM.test(raw[i])) { job.linearFeet = raw[i]; i++; }
+
+    jobs.push(job);
   }
   return jobs;
 }
