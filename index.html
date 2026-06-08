@@ -456,11 +456,13 @@ function JobsTab({jobLists,chemDefaults,completedLogs,setCompletedLogs}) {
   // Keep pending sorted by original list order
   const sortedPending = [...pendingLog].sort((a,b)=>a.jobIdx-b.jobIdx);
 
-  const lastDateRef = useRef(new Date().toISOString().slice(0,10));
+  const [lastDate, setLastDate] = useState(() => {
+    return localStorage.getItem("spraylog_lastDate") || new Date().toISOString().slice(0,10);
+  });
 
   const openJob = (idx) => {
     if (panel?.jobIdx===idx) { setPanel(null); return; }
-    setPanel({ jobIdx:idx, date:lastDateRef.current, timeStart:"", timeEnd:"", weather:null, status:"", loading:false });
+    setPanel({ jobIdx:idx, date:lastDate, timeStart:"", timeEnd:"", weather:null, status:"", loading:false, timeRaw:"" });
   };
 
   // Parse "10:49 AM - 11:30 AM" or "10:49-11:30" into {start, end}
@@ -475,7 +477,8 @@ function JobsTab({jobLists,chemDefaults,completedLogs,setCompletedLogs}) {
 
   const doFetch = async () => {
     if (!panel.timeStart||!panel.date) { setPanel(p=>({...p,status:"⚠️ Enter a start time first"})); return; }
-    lastDateRef.current = panel.date;
+    setLastDate(panel.date);
+    localStorage.setItem("spraylog_lastDate", panel.date);
     setPanel(p=>({...p,loading:true,weather:null,status:"Locating address…"}));
     try {
       const job = jobs[panel.jobIdx];
@@ -610,7 +613,8 @@ function JobsTab({jobLists,chemDefaults,completedLogs,setCompletedLogs}) {
                   <div style={{fontSize:11,fontWeight:700,color:"#555",textTransform:"uppercase",letterSpacing:.4,marginBottom:4}}>Date</div>
                   <input type="date" value={panel.date}
                     onChange={e=>{
-                      lastDateRef.current=e.target.value;
+                      setLastDate(e.target.value);
+                      localStorage.setItem("spraylog_lastDate", e.target.value);
                       setPanel(p=>({...p,date:e.target.value,weather:null,status:""}));
                     }}
                     style={{width:"100%",padding:"7px 10px",border:"1px solid #bbb",borderRadius:5,fontSize:13}}/>
