@@ -456,13 +456,26 @@ function JobsTab({jobLists,chemDefaults,completedLogs,setCompletedLogs}) {
   // Keep pending sorted by original list order
   const sortedPending = [...pendingLog].sort((a,b)=>a.jobIdx-b.jobIdx);
 
+  const lastDateRef = useRef(new Date().toISOString().slice(0,10));
+
   const openJob = (idx) => {
     if (panel?.jobIdx===idx) { setPanel(null); return; }
-    setPanel({ jobIdx:idx, date:new Date().toISOString().slice(0,10), timeStart:"", timeEnd:"", weather:null, status:"", loading:false });
+    setPanel({ jobIdx:idx, date:lastDateRef.current, timeStart:"", timeEnd:"", weather:null, status:"", loading:false });
+  };
+
+  // Parse "10:49 AM - 11:30 AM" or "10:49-11:30" into {start, end}
+  const parseTimeInput = (val) => {
+    const sep = val.match(/[-–—to]+/i);
+    if (sep) {
+      const parts = val.split(/\s*[-–—]\s*|(\s+to\s+)/i).filter(p=>p&&!/^\s+to\s+$/i.test(p));
+      return { start: parts[0]?.trim()||"", end: parts[1]?.trim()||"" };
+    }
+    return { start: val.trim(), end: "" };
   };
 
   const doFetch = async () => {
     if (!panel.timeStart||!panel.date) { setPanel(p=>({...p,status:"⚠️ Enter a start time first"})); return; }
+    lastDateRef.current = panel.date;
     setPanel(p=>({...p,loading:true,weather:null,status:"Locating address…"}));
     try {
       const job = jobs[panel.jobIdx];
@@ -592,17 +605,31 @@ function JobsTab({jobLists,chemDefaults,completedLogs,setCompletedLogs}) {
                 <div style={{fontWeight:700,fontSize:15,color:"#2d5a1b",marginBottom:2}}>{job.name}</div>
                 <div style={{fontSize:12,color:"#777",marginBottom:16}}>{job.address}</div>
 
-                {[["Date","date","date",""],["Start Time","text","timeStart","10:49 AM"],["End Time","text","timeEnd","11:30 AM (optional)"]].map(([label,type,key,ph])=>(
-                  <div key={key} style={{marginBottom:10}}>
-                    <div style={{fontSize:11,fontWeight:700,color:"#555",textTransform:"uppercase",letterSpacing:.4,marginBottom:4}}>
-                      {label}{key==="timeStart"&&<span style={{fontSize:10,color:"#aaa",fontWeight:400}}> — press Enter to fetch</span>}
-                    </div>
-                    <input type={type} value={panel[key]} placeholder={ph}
-                      onChange={e=>setPanel(p=>({...p,[key]:e.target.value,weather:key!=="timeEnd"?null:p.weather,status:""}))}
-                      onKeyDown={e=>{if(e.key==="Enter"&&key==="timeStart")doFetch();}}
-                      style={{width:"100%",padding:"7px 10px",border:"1px solid #bbb",borderRadius:5,fontSize:13}}/>
+                {/* Date */}
+                <div style={{marginBottom:10}}>
+                  <div style={{fontSize:11,fontWeight:700,color:"#555",textTransform:"uppercase",letterSpacing:.4,marginBottom:4}}>Date</div>
+                  <input type="date" value={panel.date}
+                    onChange={e=>{
+                      lastDateRef.current=e.target.value;
+                      setPanel(p=>({...p,date:e.target.value,weather:null,status:""}));
+                    }}
+                    style={{width:"100%",padding:"7px 10px",border:"1px solid #bbb",borderRadius:5,fontSize:13}}/>
+                </div>
+
+                {/* Time — single line, supports "10:49 AM - 11:30 AM" */}
+                <div style={{marginBottom:14}}>
+                  <div style={{fontSize:11,fontWeight:700,color:"#555",textTransform:"uppercase",letterSpacing:.4,marginBottom:4}}>
+                    Time &nbsp;<span style={{fontSize:10,color:"#aaa",fontWeight:400}}>start or "10:49 AM - 11:30 AM" · Enter to fetch</span>
                   </div>
-                ))}
+                  <input value={panel.timeRaw||""} placeholder="10:49 AM - 11:30 AM"
+                    onChange={e=>{
+                      const raw=e.target.value;
+                      const {start,end}=parseTimeInput(raw);
+                      setPanel(p=>({...p,timeRaw:raw,timeStart:start,timeEnd:end,weather:null,status:""}));
+                    }}
+                    onKeyDown={e=>{if(e.key==="Enter")doFetch();}}
+                    style={{width:"100%",padding:"7px 10px",border:"1px solid #bbb",borderRadius:5,fontSize:13}}/>
+                </div>
 
                 {panel.loading&&<div style={{textAlign:"center",padding:"10px 0",fontSize:13,color:"#888",fontStyle:"italic"}}>{panel.status||"Working…"}</div>}
                 {!panel.loading&&panel.status&&<p style={{fontSize:12,color:panel.status.startsWith("❌")||panel.status.startsWith("⚠️")?"#c0392b":"#2d5a1b",margin:"0 0 12px"}}>{panel.status}</p>}
