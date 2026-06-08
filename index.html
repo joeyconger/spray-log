@@ -441,8 +441,8 @@ function JobsTab({jobLists,chemDefaults,completedLogs,setCompletedLogs}) {
   const [listName, setListName] = useState(LISTS[0]);
   const [search, setSearch]     = useState("");
   const [panel, setPanel]       = useState(null);
-  // pendingLog: array of { jobIdx, job, weather } in list order
-  const [pendingLog, setPendingLog] = useState([]);
+  // pendingLog persists across tab switches via localStorage
+  const [pendingLog, setPendingLog] = useLocalStorage("spraylog_pending_"+listName, []);
 
   const jobs     = jobLists[listName]||[];
   const isTAC100 = listName==="TAC 100";
@@ -494,18 +494,25 @@ function JobsTab({jobLists,chemDefaults,completedLogs,setCompletedLogs}) {
   const doAddToLog = () => {
     const job = {...jobs[panel.jobIdx],date:panel.date,timeStart:panel.timeStart,timeEnd:panel.timeEnd};
     const w   = panel.weather;
-    // Remove existing entry for this job if re-adding, then add fresh
     const filtered2 = pendingLog.filter(e=>e.jobIdx!==panel.jobIdx);
     setPendingLog([...filtered2, {jobIdx:panel.jobIdx, job, weather:w}]);
-    setPanel(null);
+    setPanel(p=>({...p,status:"✅ Added to log"}));
   };
 
   const removeFromLog = (jobIdx) => {
     setPendingLog(pendingLog.filter(e=>e.jobIdx!==jobIdx));
   };
 
+  const [batchLabel, setBatchLabel] = useState("");
+  const [showLabelPrompt, setShowLabelPrompt] = useState(false);
+
   const doPrintLog = () => {
     if (!sortedPending.length) return;
+    setShowLabelPrompt(true);
+  };
+
+  const doConfirmPrint = (label) => {
+    setShowLabelPrompt(false);
     const chem = chemDefaults[listName]||DEFAULT_CHEM[listName];
     printHTML(buildTrailsLogHTML(sortedPending.map(e=>({job:e.job,weather:e.weather})), listName));
     if (isTAC100) {
@@ -515,16 +522,19 @@ function JobsTab({jobLists,chemDefaults,completedLogs,setCompletedLogs}) {
         });
       }, 800);
     }
-    // Save all to completed logs
-    const newLogs = sortedPending.map(e=>({
-      id: Date.now()+e.jobIdx,
-      listName, job:e.job, weather:e.weather, chem,
-      trailsHTML: buildTrailsLogHTML([{job:e.job,weather:e.weather}], listName),
-      pesticideHTML: isTAC100?buildPesticideHTML(e.job,e.weather,chem):null,
+    // Save as a single batch entry
+    const batch = {
+      id: Date.now(),
+      isBatch: true,
+      label: label||listName,
+      listName,
+      chem,
+      entries: sortedPending.map(e=>({job:e.job, weather:e.weather})),
       createdAt: new Date().toLocaleString(),
-    }));
-    setCompletedLogs([...newLogs,...completedLogs]);
+    };
+    setCompletedLogs([batch,...completedLogs]);
     setPendingLog([]);
+    setBatchLabel("");
   };
 
   const counts = Object.fromEntries(LISTS.map(l=>[l,(jobLists[l]||[]).length]));
@@ -544,6 +554,28 @@ function JobsTab({jobLists,chemDefaults,completedLogs,setCompletedLogs}) {
               padding:"7px 18px",background:"#1a3d6e",color:"#fff",border:"none",
               borderRadius:6,fontSize:12,fontWeight:700,cursor:"pointer"
             }}>🖨 Print {isTAC100?"Log + Application Records":"Log"}</button>
+          </div>
+
+          {/* Label prompt */}
+          {showLabelPrompt&&(
+            <div style={{background:"#fff",border:"1px solid #b5d4a0",borderRadius:7,padding:"12px 14px",marginBottom:8}}>
+              <div style={{fontSize:12,fontWeight:700,color:"#2d5a1b",marginBottom:8}}>Name this log batch (e.g. "June Trails")</div>
+              <div style={{display:"flex",gap:8}}>
+                <input
+                  value={batchLabel}
+                  onChange={e=>setBatchLabel(e.target.value)}
+                  onKeyDown={e=>{if(e.key==="Enter")doConfirmPrint(batchLabel);}}
+                  placeholder={`e.g. June ${listName}`}
+                  autoFocus
+                  style={{flex:1,padding:"7px 10px",border:"1px solid #bbb",borderRadius:5,fontSize:13}}
+                />
+                <button onClick={()=>doConfirmPrint(batchLabel)} style={{padding:"7px 16px",background:"#1a3d6e",color:"#fff",border:"none",borderRadius:5,fontSize:12,fontWeight:700,cursor:"pointer"}}>Print & Save</button>
+                <button onClick={()=>setShowLabelPrompt(false)} style={{padding:"7px 10px",background:"none",border:"1px solid #ddd",borderRadius:5,fontSize:12,color:"#aaa",cursor:"pointer"}}>Cancel</button>
+              </div>
+            </div>
+          )}
+
+
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:4}}>
             {sortedPending.map(e=>(
@@ -680,7 +712,22 @@ function JobsTab({jobLists,chemDefaults,completedLogs,setCompletedLogs}) {
 // ── Saved Logs ────────────────────────────────────────────────────────────────
 function LogsTab({completedLogs,setCompletedLogs}) {
   const [filter,setFilter]=useState("All");
+  const [expanded,setExpanded]=useState({});
   const shown=filter==="All"?completedLogs:completedLogs.filter(l=>l.listName===filter);
+
+  const toggleExpand=(id)=>setExpanded(e=>({...e,[id]:!e[id]}));
+
+  const reprintBatch=(log)=>{
+    printHTML(buildTrailsLogHTML(log.entries, log.listName));
+    if (log.listName==="TAC 100") {
+      setTimeout(()=>{
+        log.entries.forEach((e,i)=>{
+          setTimeout(()=>printHTML(buildPesticideHTML(e.job,e.weather,log.chem)),i*800);
+        });
+      },800);
+    }
+  };
+
   return (
     <div>
       <h3 style={{color:"#2d5a1b",marginTop:0}}>Saved Logs ({completedLogs.length})</h3>
@@ -695,25 +742,59 @@ function LogsTab({completedLogs,setCompletedLogs}) {
       </div>
       {shown.length===0&&<p style={{color:"#aaa",fontSize:13}}>No logs saved yet.</p>}
       <div style={{display:"flex",flexDirection:"column",gap:8}}>
-        {shown.map(log=>(
-          <div key={log.id} style={{border:"1px solid #ddd",borderRadius:8,padding:"12px 16px",background:"#fff"}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12}}>
-              <div style={{flex:1}}>
-                <strong style={{fontSize:14}}>{log.job.name}</strong>
-                <span style={{marginLeft:8,fontSize:11,background:"#e8f0e2",color:"#2d5a1b",padding:"2px 7px",borderRadius:10,fontWeight:700}}>{log.listName}</span>
-                <div style={{fontSize:12,color:"#666",marginTop:3}}>{log.job.date} · {log.job.timeStart}{log.job.timeEnd?` – ${log.job.timeEnd}`:""}</div>
-                <div style={{fontSize:12,color:"#888"}}>{log.job.address}</div>
-                <div style={{fontSize:12,marginTop:3}}>{log.weather?.sky==="Clear"?"☀️":log.weather?.sky==="Partly Cloudy"?"⛅":"☁️"} {log.weather?.sky}, {log.weather?.temp}°F, {log.weather?.wind} mph {log.weather?.windDir}</div>
+        {shown.map(log=>{
+          const isBatch=log.isBatch;
+          const isOpen=expanded[log.id];
+          return (
+            <div key={log.id} style={{border:"1px solid #ddd",borderRadius:8,background:"#fff",overflow:"hidden"}}>
+              {/* Header row */}
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 16px",gap:12}}>
+                <div style={{flex:1,cursor:isBatch?"pointer":"default"}} onClick={()=>isBatch&&toggleExpand(log.id)}>
+                  <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+                    <strong style={{fontSize:14}}>{isBatch?log.label:log.job?.name}</strong>
+                    <span style={{fontSize:11,background:"#e8f0e2",color:"#2d5a1b",padding:"2px 7px",borderRadius:10,fontWeight:700}}>{log.listName}</span>
+                    {isBatch&&<span style={{fontSize:11,color:"#888"}}>{log.entries?.length} jobs</span>}
+                  </div>
+                  <div style={{fontSize:12,color:"#888",marginTop:3}}>{log.createdAt}</div>
+                  {isBatch&&<div style={{fontSize:11,color:"#aaa",marginTop:2}}>{isOpen?"▲ Hide jobs":"▼ Show jobs"}</div>}
+                  {!isBatch&&(
+                    <>
+                      <div style={{fontSize:12,color:"#666",marginTop:2}}>{log.job?.date} · {log.job?.timeStart}{log.job?.timeEnd?` – ${log.job?.timeEnd}`:""}</div>
+                      <div style={{fontSize:12,color:"#888"}}>{log.job?.address}</div>
+                    </>
+                  )}
+                </div>
+                <div style={{display:"flex",gap:6,flexShrink:0,alignItems:"center",flexWrap:"wrap"}}>
+                  {isBatch
+                    ? <button onClick={()=>reprintBatch(log)} style={{padding:"5px 10px",background:"#2d5a1b",color:"#fff",border:"none",borderRadius:5,fontSize:11,cursor:"pointer"}}>🖨 Reprint</button>
+                    : <>
+                        <button onClick={()=>printHTML(buildTrailsLogHTML([{job:log.job,weather:log.weather}],log.listName))} style={{padding:"5px 10px",background:"#2d5a1b",color:"#fff",border:"none",borderRadius:5,fontSize:11,cursor:"pointer"}}>Log</button>
+                        {log.listName==="TAC 100"&&<button onClick={()=>printHTML(buildPesticideHTML(log.job,log.weather,log.chem))} style={{padding:"5px 10px",background:"#1a3d6e",color:"#fff",border:"none",borderRadius:5,fontSize:11,cursor:"pointer"}}>Application</button>}
+                      </>
+                  }
+                  <button onClick={()=>{if(confirm("Delete?"))setCompletedLogs(completedLogs.filter(l=>l.id!==log.id))}}
+                    style={{padding:"5px 8px",background:"none",color:"#c0392b",border:"1px solid #e0c0c0",borderRadius:5,fontSize:11,cursor:"pointer"}}>✕</button>
+                </div>
               </div>
-              <div style={{display:"flex",gap:6,flexShrink:0,alignItems:"center",flexWrap:"wrap"}}>
-                <button onClick={()=>printHTML(log.trailsHTML)} style={{padding:"5px 10px",background:"#2d5a1b",color:"#fff",border:"none",borderRadius:5,fontSize:11}}>Log</button>
-                {log.pesticideHTML&&<button onClick={()=>printHTML(log.pesticideHTML)} style={{padding:"5px 10px",background:"#1a3d6e",color:"#fff",border:"none",borderRadius:5,fontSize:11}}>Application</button>}
-                <button onClick={()=>{if(confirm("Delete?"))setCompletedLogs(completedLogs.filter(l=>l.id!==log.id))}}
-                  style={{padding:"5px 8px",background:"none",color:"#c0392b",border:"1px solid #e0c0c0",borderRadius:5,fontSize:11}}>✕</button>
-              </div>
+              {/* Expanded job list for batches */}
+              {isBatch&&isOpen&&(
+                <div style={{borderTop:"1px solid #f0f0f0",padding:"8px 16px 12px"}}>
+                  {log.entries?.map((e,i)=>(
+                    <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"5px 0",borderBottom:"1px solid #f5f5f5",fontSize:12}}>
+                      <div>
+                        <strong>{e.job.name}</strong>
+                        <span style={{color:"#888",marginLeft:8}}>{e.job.date} · {e.job.timeStart}{e.job.timeEnd?` – ${e.job.timeEnd}`:""}</span>
+                      </div>
+                      <span style={{fontSize:11,color:"#2d5a1b"}}>
+                        {e.weather?.sky==="Clear"?"☀️":e.weather?.sky==="Partly Cloudy"?"⛅":"☁️"} {e.weather?.temp}°F · {e.weather?.wind}mph {e.weather?.windDir}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
