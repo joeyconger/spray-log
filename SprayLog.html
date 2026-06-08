@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Spray Log Generator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; font-family: Georgia, serif; background: #f2f5ee; }
+  input, button, textarea, select { font-family: inherit; }
+  button { cursor: pointer; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useRef } = React;
+
+// ── Constants ─────────────────────────────────────────────────────────────────
+const LISTS = ["TAC 100", "TAC 295 Big Spray", "TAC 295 Small Spray", "Trails"];
+const DEFAULT_CHEM = {
+  "TAC 100":             { pesticide:"Glyphosate", tradeName:"Round Up Custom", manufacturer:"Monsanto", tankConc:"1%", epaReg:"524-343", epaEst:"524-IA-1", applicatorType:"Recirculating Sprayer", ratePerAcre:"12 oz per acre", gallonsMixture:"", amountApplied:"", rateCarrier:"" },
+  "TAC 295 Big Spray":   { pesticide:"Glyphosate", tradeName:"Round Up Custom", manufacturer:"Monsanto", tankConc:"1%", epaReg:"524-343", epaEst:"524-IA-1", applicatorType:"Recirculating Sprayer", ratePerAcre:"12 oz per acre", gallonsMixture:"", amountApplied:"", rateCarrier:"" },
+  "TAC 295 Small Spray": { pesticide:"Glyphosate", tradeName:"Round Up Custom", manufacturer:"Monsanto", tankConc:"1%", epaReg:"524-343", epaEst:"524-IA-1", applicatorType:"Recirculating Sprayer", ratePerAcre:"12 oz per acre", gallonsMixture:"", amountApplied:"", rateCarrier:"" },
+  "Trails":              { pesticide:"Glyphosate", tradeName:"Round Up Custom", manufacturer:"Monsanto", tankConc:"1%", epaReg:"524-343", epaEst:"524-IA-1", applicatorType:"Recirculating Sprayer", ratePerAcre:"12 oz per acre", gallonsMixture:"", amountApplied:"", rateCarrier:"" },
+};
+
+// ── Storage ───────────────────────────────────────────────────────────────────
+function useLocalStorage(key, init) {
+  const [val, setVal] = useState(() => {
+    try { const s = localStorage.getItem(key); return s ? JSON.parse(s) : init; } catch { return init; }
+  });
+  const set = (v) => { setVal(v); try { localStorage.setItem(key, JSON.stringify(v)); } catch {} };
+  return [val, set];
+}
+
+// ── Weather ───────────────────────────────────────────────────────────────────
+function parseHour(timeStr) {
+  if (!timeStr) return 10;
+  const match = timeStr.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+  if (!match) return 10;
+  let h = parseInt(match[1]);
+  const ampm = (match[3] || "").toUpperCase();
+  if (ampm === "PM" && h !== 12) h += 12;
+  if (ampm === "AM" && h === 12) h = 0;
+  return Math.min(Math.max(h, 0), 23);
+}
+
+async function geocodeAddress(address) {
+  try {
+    const q = encodeURIComponent(address + ", Tulsa, OK, USA");
+    const r = await fetch(`https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`, {
+      headers: { "User-Agent": "SprayLogApp/1.0", "Accept-Language": "en" }
+    });
+    const d = await r.json();
+    if (d && d[0]) return { lat: parseFloat(d[0].lat), lon: parseFloat(d[0].lon) };
+  } catch(e) { console.warn("Geocode failed:", e); }
+  return { lat: 36.1540, lon: -95.9928 }; // Tulsa fallback
+}
+
+async function fetchWeatherForDate(lat, lon, dateStr, timeStr) {
+  // Decide archive vs forecast based on date
+  const jobDate = new Date(dateStr + "T12:00:00");
+  const today   = new Date();
+  today.setHours(0,0,0,0);
+  const isHistorical = jobDate < today;
+
+  const base = isHistorical
+    ? "https://archive-api.open-meteo.com/v1/archive"
+    : "https://api.open-meteo.com/v1/forecast";
+
+  const url = `${base}?latitude=${lat}&longitude=${lon}` +
+    `&hourly=temperature_2m,windspeed_10m,winddirection_10m,cloudcover` +
+    `&temperature_unit=fahrenheit&windspeed_unit=mph` +
+    `&timezone=America%2FChicago&start_date=${dateStr}&end_date=${dateStr}`;
+
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`Weather API ${r.status}: ${await r.text()}`);
+  const d = await r.json();
+  if (d.error) throw new Error("Weather API: " + d.reason);
+
+  const hour   = parseHour(timeStr);
+  const temp   = d.hourly?.temperature_2m?.[hour];
+  const wind   = d.hourly?.windspeed_10m?.[hour];
+  const wdDeg  = d.hourly?.winddirection_10m?.[hour];
+  const cloud  = d.hourly?.cloudcover?.[hour];
+
+  if (temp == null) throw new Error("No weather data for that hour");
+
+  const dirs    = ["N","NE","E","SE","S","SW","W","NW"];
+  const compass = dirs[Math.round((wdDeg||0) / 45) % 8] || "N";
+  let sky = "Clear";
+  if (cloud > 70) sky = "Cloudy";
+  else if (cloud > 25) sky = "Partly Cloudy";
+
+  return {
+    temp:    Math.round(temp),
+    wind:    Math.min(Math.round(wind || 0), 9),
+    windDir: compass,
+    sky,
+  };
+}
+
+// ── File parsing ──────────────────────────────────────────────────────────────
+async function parseFileWithClaude(file, listName, onStatus) {
+  const ext = file.name.split(".").pop().toLowerCase();
+
+  const prompt = `This is a "${listName}" spray job list.
+Parse every job/site entry. Return ONLY a JSON array, no markdown, no explanation.
+Each item: { "code":"", "name":"", "address":"", "miles":"", "linearFeet":"", "acreage":"" }
+Empty string for missing fields. Get every row.`;
+
+  let messages;
+
+  if (ext === "pdf") {
+    onStatus("Reading PDF…");
+    const base64 = await new Promise((res, rej) => {
+      const rd = new FileReader();
+      rd.onload  = () => res(rd.result.split(",")[1]);
+      rd.onerror = () => rej(new Error("Could not read file"));
+      rd.readAsDataURL(file);
+    });
+    messages = [{ role:"user", content:[
+      { type:"document", source:{ type:"base64", media_type:"application/pdf", data:base64 } },
+      { type:"text", text:prompt }
+    ]}];
+  } else if (ext === "docx") {
+    onStatus("Extracting text from Word file…");
+    const ab  = await file.arrayBuffer();
+    const res = await mammoth.extractRawText({ arrayBuffer: ab });
+    const txt = res.value || "";
+    if (txt.trim().length < 10) throw new Error("Could not extract text — is this a valid .docx?");
+    messages = [{ role:"user", content: `${prompt}\n\nDOCUMENT TEXT:\n${txt}` }];
+  } else {
+    throw new Error("Only PDF and .docx are supported");
+  }
+
+  onStatus("Parsing jobs with AI…");
+  const resp = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type":"application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 4000,
+      system: "Return ONLY a valid JSON array. No markdown, no preamble, no explanation whatsoever.",
+      messages,
+    }),
+  });
+
+  if (!resp.ok) {
+    const e = await resp.json().catch(() => ({}));
+    throw new Error(e?.error?.message || `API error ${resp.status}`);
+  }
+  const data = await resp.json();
+  if (data.error) throw new Error(data.error.message);
+
+  const raw     = data.content?.[0]?.text || "";
+  if (!raw.trim()) throw new Error("AI returned empty — try again");
+  const cleaned = raw.replace(/```json|```/g,"").trim();
+  try { return JSON.parse(cleaned); }
+  catch {
+    const m = cleaned.match(/\[[\s\S]*\]/);
+    if (m) return JSON.parse(m[0]);
+    throw new Error("Could not parse AI response: " + raw.slice(0,300));
+  }
+}
+
+// ── PDF/print builders ────────────────────────────────────────────────────────
+function buildTrailsLogHTML(jobs, listName) {
+  const rows = jobs.map(({job,weather}) => `<tr>
+    <td>${job.date||""}</td><td>${job.name||""}</td><td>${job.address||""}</td>
+    <td>${job.miles||""}</td><td>${job.linearFeet||""}</td>
+    <td>${job.timeStart||""}</td><td>${job.timeEnd||""}</td>
+    <td>${weather?.sky||""}</td><td>${weather?.temp!=null?weather.temp:""}</td>
+    <td>${weather?.wind!=null?weather.wind:""}</td><td>${weather?.windDir||""}</td>
+  </tr>`).join("");
+  return `<!DOCTYPE html><html><head><meta charset="utf-8">
+<style>
+  body{font-family:Arial,sans-serif;font-size:10px;margin:16px;color:#000}
+  h2{text-align:center;font-size:13px;margin-bottom:3px}
+  h3{text-align:center;font-size:11px;margin:0 0 10px;font-weight:normal}
+  table{width:100%;border-collapse:collapse}
+  th,td{border:1px solid #333;padding:4px 6px;text-align:left;vertical-align:top}
+  th{background:#ddd;font-weight:bold}
+  .sig{margin-top:32px}
+  .sig-line{border-top:1px solid #000;width:260px;display:inline-block}
+</style></head><body>
+<h2>Maintenance Log</h2>
+<h3>City of Tulsa / Stormwater Maintenance Division — ${listName}</h3>
+<table><thead><tr>
+  <th>DATE</th><th>NAME</th><th>ADDRESS</th><th>MILES</th><th>LINEAR FT</th>
+  <th>START</th><th>END</th><th>SKY</th><th>TEMP °F</th><th>WIND</th><th>DIR</th>
+</tr></thead><tbody>${rows}</tbody></table>
+<p class="sig">Applicator Signature: <span class="sig-line"></span></p>
+<p>Notes: _______________________________________________</p>
+</body></html>`;
+}
+
+function buildPesticideHTML(job, weather, chem) {
+  const f = (label, val, full) =>
+    `<div class="field${full?' full':''}"><label>${label}</label><span>${val||""}</span></div>`;
+  return `<!DOCTYPE html><html><head><meta charset="utf-8">
+<style>
+  body{font-family:Arial,sans-serif;font-size:11px;margin:28px 32px;color:#000}
+  h2{text-align:center;font-size:15px;font-weight:bold;letter-spacing:1px;margin-bottom:2px}
+  h3{text-align:center;font-size:12px;margin:0 0 16px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 20px;margin-bottom:8px}
+  .field{display:flex;flex-direction:column}
+  .field label{font-weight:bold;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#444}
+  .field span{border-bottom:1px solid #888;padding:2px 0;min-height:18px;font-size:12px}
+  .full{grid-column:1/-1}
+  .sig-line{border-top:1px solid #000;margin-top:48px;width:300px;display:inline-block}
+  hr{border:none;border-top:1px solid #ccc;margin:10px 0}
+</style></head><body>
+<h2>Pesticide Application Record</h2>
+<h3>City of Tulsa / Stormwater Maintenance Division</h3><hr/>
+<div class="grid">
+  ${f("Date", job.date)} ${f("Time", job.timeStart)}
+  ${f("Location", job.address, true)}
+  ${f("Acres Treated", job.acreage||job.miles)} ${f("Target Species","Noxious Vegetation")}
+  ${f("Pesticide Applied", chem.pesticide)} ${f("Trade Name", chem.tradeName)}
+  ${f("Manufacturer", chem.manufacturer)} ${f("Tank Mix Concentration", chem.tankConc)}
+  ${f("Gallons of Mixture", chem.gallonsMixture)} ${f("EPA Reg No.", chem.epaReg)}
+  ${f("EPA Est No.", chem.epaEst)} ${f("Type of Applicator", chem.applicatorType)}
+  ${f("Rate of Application", chem.ratePerAcre)} ${f("Amount Applied", chem.amountApplied)}
+  ${f("Rate of Carrier", chem.rateCarrier)}
+</div><hr/>
+<div class="grid">
+  ${f("Weather Conditions", weather?.sky)} ${f("Temperature °F", weather?.temp)}
+  ${f("Wind Speed (mph)", weather?.wind)} ${f("Wind Direction", weather?.windDir)}
+</div><hr/>
+<p>Applicator Signature: <span class="sig-line"></span></p>
+<p>Notes: _______________________________________________</p>
+</body></html>`;
+}
+
+function printHTML(html) {
+  const w = window.open("","_blank");
+  if (!w) { alert("Allow pop-ups for this page to print."); return; }
+  w.document.write(html); w.document.close(); w.focus();
+  setTimeout(() => w.print(), 600);
+}
+
+// ── Shared UI ─────────────────────────────────────────────────────────────────
+function Tabs({tabs, active, onChange}) {
+  return (
+    <div style={{display:"flex",borderBottom:"2px solid #2d5a1b",marginBottom:24,gap:2,flexWrap:"wrap"}}>
+      {tabs.map(t => (
+        <button key={t} onClick={()=>onChange(t)} style={{
+          padding:"8px 18px",border:"none",fontFamily:"inherit",fontSize:13,
+          fontWeight:active===t?700:400, background:active===t?"#2d5a1b":"#e8f0e2",
+          color:active===t?"#fff":"#2d5a1b", borderRadius:"6px 6px 0 0",transition:"all .15s"
+        }}>{t}</button>
+      ))}
+    </div>
+  );
+}
+
+function ListPicker({value, onChange, counts}) {
+  return (
+    <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+      {LISTS.map(l => (
+        <button key={l} onClick={()=>onChange(l)} style={{
+          padding:"6px 14px",border:"1.5px solid #2d5a1b",borderRadius:5,
+          background:value===l?"#2d5a1b":"#fff", color:value===l?"#fff":"#2d5a1b",
+          fontWeight:value===l?700:400, fontSize:12
+        }}>{l}{counts?` (${counts[l]||0})`:""}</button>
+      ))}
+    </div>
+  );
+}
+
+function WeatherBox({weather}) {
+  if (!weather) return null;
+  const icon = weather.sky==="Clear"?"☀️":weather.sky==="Partly Cloudy"?"⛅":"☁️";
+  return (
+    <div style={{background:"#e8f0e2",border:"1px solid #b5d4a0",borderRadius:7,padding:"10px 14px",marginBottom:14}}>
+      <div style={{fontSize:11,fontWeight:700,color:"#2d5a1b",marginBottom:8,textTransform:"uppercase",letterSpacing:.5}}>Weather Conditions</div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"6px 12px",fontSize:13}}>
+        <div><span style={{color:"#888",fontSize:11,display:"block"}}>Sky</span><strong>{icon} {weather.sky}</strong></div>
+        <div><span style={{color:"#888",fontSize:11,display:"block"}}>Temp</span><strong>{weather.temp}°F</strong></div>
+        <div><span style={{color:"#888",fontSize:11,display:"block"}}>Wind</span><strong>{weather.wind} mph</strong></div>
+        <div><span style={{color:"#888",fontSize:11,display:"block"}}>Direction</span><strong>{weather.windDir}</strong></div>
+      </div>
+    </div>
+  );
+}
+
+// ── Upload Tab ────────────────────────────────────────────────────────────────
+function UploadTab({jobLists, setJobLists}) {
+  const [selectedList, setSelectedList] = useState(LISTS[0]);
+  const [loading, setLoading]           = useState(false);
+  const [status, setStatus]             = useState("");
+  const [dragOver, setDragOver]         = useState(false);
+  const fileRef = useRef();
+
+  const handleFile = async (file) => {
+    if (!file) return;
+    const ext = file.name.split(".").pop().toLowerCase();
+    if (!["pdf","docx"].includes(ext)) { setStatus("❌ Only PDF and .docx supported"); return; }
+    setLoading(true); setStatus("");
+    try {
+      const parsed = await parseFileWithClaude(file, selectedList, setStatus);
+      setJobLists({...jobLists, [selectedList]: parsed});
+      setStatus(`✅ Saved ${parsed.length} jobs to "${selectedList}"`);
+    } catch(e) { setStatus("❌ " + e.message); }
+    setLoading(false);
+  };
+
+  const counts = Object.fromEntries(LISTS.map(l=>[l,(jobLists[l]||[]).length]));
+
+  return (
+    <div>
+      <h3 style={{color:"#2d5a1b",marginTop:0}}>Upload Job List</h3>
+      <p style={{fontSize:13,color:"#666",marginTop:0}}>Select which list this file is for, then upload. Supports PDF and Word (.docx).</p>
+
+      <div style={{marginBottom:20}}>
+        <div style={{fontSize:11,fontWeight:700,color:"#555",textTransform:"uppercase",letterSpacing:.4,marginBottom:8}}>Which list?</div>
+        <ListPicker value={selectedList} onChange={setSelectedList} counts={counts}/>
+      </div>
+
+      <div
+        onDragOver={e=>{e.preventDefault();setDragOver(true)}}
+        onDragLeave={()=>setDragOver(false)}
+        onDrop={e=>{e.preventDefault();setDragOver(false);handleFile(e.dataTransfer.files[0])}}
+        onClick={()=>!loading&&fileRef.current.click()}
+        style={{
+          border:`2px dashed ${dragOver?"#2d5a1b":"#ccc"}`,borderRadius:12,
+          padding:"36px 24px",textAlign:"center",cursor:loading?"wait":"pointer",
+          background:dragOver?"#f0f7eb":"#fafafa",transition:"all .2s",marginBottom:16
+        }}>
+        <div style={{fontSize:34,marginBottom:8}}>📄</div>
+        {loading
+          ? <><div style={{fontSize:14,fontWeight:600,color:"#2d5a1b",marginBottom:4}}>Processing…</div>
+              <div style={{fontSize:12,color:"#888"}}>{status}</div></>
+          : <><div style={{fontSize:14,fontWeight:600,color:"#333",marginBottom:4}}>Drop file here or click to browse</div>
+              <div style={{fontSize:12,color:"#aaa"}}>PDF or Word (.docx)</div></>
+        }
+        <input ref={fileRef} type="file" accept=".pdf,.docx" style={{display:"none"}}
+          onChange={e=>handleFile(e.target.files[0])}/>
+      </div>
+
+      {!loading && status && (
+        <p style={{fontSize:13,color:status.startsWith("✅")?"#2d5a1b":"#c0392b",margin:"0 0 16px"}}>{status}</p>
+      )}
+
+      <h4 style={{color:"#2d5a1b",margin:"16px 0 10px",fontSize:13}}>Stored Lists</h4>
+      {LISTS.map(l => {
+        const jobs = jobLists[l]||[];
+        return (
+          <div key={l} style={{marginBottom:8,border:"1px solid #ddd",borderRadius:7,overflow:"hidden"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",background:"#e8f0e2"}}>
+              <span style={{fontWeight:700,fontSize:13,color:"#2d5a1b"}}>{l}</span>
+              <div style={{display:"flex",gap:8,alignItems:"center"}}>
+                <span style={{fontSize:12,color:"#555"}}>{jobs.length} jobs</span>
+                {jobs.length>0&&<button onClick={()=>{if(confirm(`Clear "${l}"?`))setJobLists({...jobLists,[l]:[]})}}
+                  style={{fontSize:11,color:"#c0392b",background:"none",border:"1px solid #e0c0c0",borderRadius:4,padding:"2px 7px"}}>
+                  Clear</button>}
+              </div>
+            </div>
+            {jobs.length>0&&(
+              <div style={{maxHeight:120,overflowY:"auto"}}>
+                <table style={{width:"100%",borderCollapse:"collapse",fontSize:11}}>
+                  <tbody>
+                    {jobs.map((j,i)=>(
+                      <tr key={i} style={{background:i%2===0?"#fff":"#f9fbf7",borderBottom:"1px solid #f0f0f0"}}>
+                        <td style={{padding:"4px 10px",color:"#aaa",width:28}}>{i+1}</td>
+                        <td style={{padding:"4px 8px",fontWeight:600}}>{j.name}</td>
+                        <td style={{padding:"4px 8px",color:"#666"}}>{j.address}</td>
+                        <td style={{padding:"4px 8px",color:"#999",whiteSpace:"nowrap"}}>{j.miles?`${j.miles} mi`:j.acreage?`${j.acreage} ac`:""}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── Jobs Tab ──────────────────────────────────────────────────────────────────
+function JobsTab({jobLists, chemDefaults, completedLogs, setCompletedLogs}) {
+  const [listName, setListName] = useState(LISTS[0]);
+  const [search, setSearch]     = useState("");
+  const [panel, setPanel]       = useState(null); // { jobIdx, date, timeStart, timeEnd, weather, status, loading }
+
+  const jobs     = jobLists[listName]||[];
+  const isTAC100 = listName==="TAC 100";
+  const filtered = search.trim()
+    ? jobs.filter(j=>
+        j.name?.toLowerCase().includes(search.toLowerCase())||
+        j.code?.toLowerCase().includes(search.toLowerCase())||
+        j.address?.toLowerCase().includes(search.toLowerCase()))
+    : jobs;
+
+  const openJob = (idx) => {
+    if (panel?.jobIdx===idx) { setPanel(null); return; }
+    const today = new Date().toISOString().slice(0,10);
+    setPanel({ jobIdx:idx, date:today, timeStart:"", timeEnd:"", weather:null, status:"", loading:false });
+  };
+
+  const doFetchWeather = async () => {
+    if (!panel.timeStart || !panel.date) {
+      setPanel(p=>({...p, status:"⚠️ Enter a start time first"}));
+      return;
+    }
+    setPanel(p=>({...p, loading:true, weather:null, status:"Geocoding address…"}));
+    try {
+      const job = jobs[panel.jobIdx];
+      const {lat, lon} = await geocodeAddress(job.address);
+      setPanel(p=>({...p, status:"Fetching weather…"}));
+      const weather = await fetchWeatherForDate(lat, lon, panel.date, panel.timeStart);
+      setPanel(p=>({...p, loading:false, weather, status:""}));
+    } catch(e) {
+      setPanel(p=>({...p, loading:false, status:"❌ "+e.message}));
+    }
+  };
+
+  const doGenerate = () => {
+    const job     = {...jobs[panel.jobIdx], date:panel.date, timeStart:panel.timeStart, timeEnd:panel.timeEnd};
+    const weather = panel.weather;
+    const chem    = chemDefaults[listName]||DEFAULT_CHEM[listName];
+
+    printHTML(buildTrailsLogHTML([{job,weather}], listName));
+    if (isTAC100) setTimeout(()=>printHTML(buildPesticideHTML(job,weather,chem)), 800);
+
+    const entry = {
+      id: Date.now(), listName, job, weather, chem,
+      trailsHTML:    buildTrailsLogHTML([{job,weather}], listName),
+      pesticideHTML: isTAC100 ? buildPesticideHTML(job,weather,chem) : null,
+      createdAt:     new Date().toLocaleString(),
+    };
+    setCompletedLogs([entry,...completedLogs]);
+  };
+
+  const counts = Object.fromEntries(LISTS.map(l=>[l,(jobLists[l]||[]).length]));
+
+  return (
+    <div>
+      <div style={{marginBottom:16}}>
+        <ListPicker value={listName} onChange={l=>{setListName(l);setPanel(null);setSearch("");}} counts={counts}/>
+      </div>
+
+      {jobs.length===0 ? (
+        <div style={{padding:40,textAlign:"center",color:"#aaa",border:"2px dashed #ddd",borderRadius:10}}>
+          <div style={{fontSize:32,marginBottom:8}}>📋</div>
+          <div style={{fontWeight:600,marginBottom:4}}>No jobs in {listName}</div>
+          <div style={{fontSize:12}}>Go to Upload to add your job list file</div>
+        </div>
+      ) : (
+        <div style={{display:"grid", gridTemplateColumns:panel?"1fr 340px":"1fr", gap:16, alignItems:"start"}}>
+
+          {/* Job list */}
+          <div>
+            <input value={search} onChange={e=>setSearch(e.target.value)}
+              placeholder="Search by name, code, or address…"
+              style={{width:"100%",padding:"8px 12px",border:"1px solid #ccc",borderRadius:7,fontSize:13,marginBottom:8}}/>
+            <div style={{fontSize:11,color:"#aaa",marginBottom:6}}>{filtered.length} job{filtered.length!==1?"s":""} · click to log</div>
+            <div style={{display:"flex",flexDirection:"column",gap:4,maxHeight:560,overflowY:"auto",paddingRight:4}}>
+              {filtered.map(job => {
+                const idx      = jobs.indexOf(job);
+                const isActive = panel?.jobIdx===idx;
+                const wasLogged= completedLogs.some(l=>l.listName===listName&&l.job.name===job.name);
+                return (
+                  <div key={idx} onClick={()=>openJob(idx)} style={{
+                    padding:"10px 14px",borderRadius:7,cursor:"pointer",transition:"all .12s",
+                    border:`1.5px solid ${isActive?"#2d5a1b":wasLogged?"#b5d4a0":"#e0e0e0"}`,
+                    background:isActive?"#2d5a1b":wasLogged?"#f4faf0":"#fff",
+                  }}>
+                    <div style={{fontWeight:600,fontSize:13,color:isActive?"#fff":"#1a1a1a"}}>{job.name}</div>
+                    <div style={{fontSize:11,color:isActive?"#b5d4a0":"#999",marginTop:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                      {job.address}{job.miles?` · ${job.miles} mi`:""}{job.acreage?` · ${job.acreage} ac`:""}
+                    </div>
+                    {wasLogged&&!isActive&&<div style={{fontSize:10,color:"#2d5a1b",marginTop:2,fontWeight:600}}>✓ previously logged</div>}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Panel */}
+          {panel && (() => {
+            const job      = jobs[panel.jobIdx];
+            const canFetch = !!panel.timeStart && !!panel.date && !panel.loading;
+            const canGen   = !!panel.weather;
+            return (
+              <div style={{border:"2px solid #2d5a1b",borderRadius:10,padding:18,background:"#f9fcf7",position:"sticky",top:16}}>
+                <div style={{fontWeight:700,fontSize:15,color:"#2d5a1b",marginBottom:2}}>{job.name}</div>
+                <div style={{fontSize:12,color:"#777",marginBottom:16}}>{job.address}</div>
+
+                {/* Date */}
+                <div style={{marginBottom:10}}>
+                  <div style={{fontSize:11,fontWeight:700,color:"#555",textTransform:"uppercase",letterSpacing:.4,marginBottom:4}}>Date</div>
+                  <input type="date" value={panel.date}
+                    onChange={e=>setPanel(p=>({...p,date:e.target.value,weather:null,status:""}))}
+                    style={{width:"100%",padding:"7px 10px",border:"1px solid #bbb",borderRadius:5,fontSize:13}}/>
+                </div>
+
+                {/* Start time */}
+                <div style={{marginBottom:10}}>
+                  <div style={{fontSize:11,fontWeight:700,color:"#555",textTransform:"uppercase",letterSpacing:.4,marginBottom:4}}>
+                    Start Time &nbsp;<span style={{fontSize:10,color:"#aaa",fontWeight:400}}>press Enter to fetch</span>
+                  </div>
+                  <input value={panel.timeStart} placeholder="10:49 AM"
+                    onChange={e=>setPanel(p=>({...p,timeStart:e.target.value,weather:null,status:""}))}
+                    onKeyDown={e=>{ if(e.key==="Enter") doFetchWeather(); }}
+                    style={{width:"100%",padding:"7px 10px",border:"1px solid #bbb",borderRadius:5,fontSize:13}}/>
+                </div>
+
+                {/* End time */}
+                <div style={{marginBottom:14}}>
+                  <div style={{fontSize:11,fontWeight:700,color:"#555",textTransform:"uppercase",letterSpacing:.4,marginBottom:4}}>
+                    End Time &nbsp;<span style={{fontSize:10,color:"#aaa",fontWeight:400}}>optional</span>
+                  </div>
+                  <input value={panel.timeEnd} placeholder="11:30 AM"
+                    onChange={e=>setPanel(p=>({...p,timeEnd:e.target.value}))}
+                    style={{width:"100%",padding:"7px 10px",border:"1px solid #bbb",borderRadius:5,fontSize:13}}/>
+                </div>
+
+                {/* Status / weather */}
+                {panel.loading && (
+                  <div style={{textAlign:"center",padding:"10px 0",fontSize:13,color:"#888",fontStyle:"italic"}}>{panel.status||"Working…"}</div>
+                )}
+                {!panel.loading && panel.status && (
+                  <p style={{fontSize:12,color:panel.status.startsWith("❌")||panel.status.startsWith("⚠️")?"#c0392b":"#2d5a1b",margin:"0 0 12px"}}>{panel.status}</p>
+                )}
+                {panel.weather && <WeatherBox weather={panel.weather}/>}
+
+                {/* Fetch button (only if no weather yet) */}
+                {!panel.weather && !panel.loading && (
+                  <button onClick={doFetchWeather} disabled={!canFetch} style={{
+                    width:"100%",padding:"10px",marginBottom:8,
+                    background:canFetch?"#2d5a1b":"#ccc",color:"#fff",border:"none",borderRadius:7,
+                    fontSize:13,fontWeight:600,cursor:canFetch?"pointer":"not-allowed"
+                  }}>⛅ Fetch Weather</button>
+                )}
+
+                {/* Re-fetch link if weather already loaded */}
+                {panel.weather && !panel.loading && (
+                  <button onClick={doFetchWeather} style={{
+                    width:"100%",padding:"6px",marginBottom:8,background:"none",
+                    border:"1px solid #b5d4a0",borderRadius:6,fontSize:11,color:"#2d5a1b",cursor:"pointer"
+                  }}>↺ Re-fetch weather</button>
+                )}
+
+                {/* Generate */}
+                {canGen && (
+                  <button onClick={doGenerate} style={{
+                    width:"100%",padding:"11px",background:"#1a3d6e",color:"#fff",border:"none",
+                    borderRadius:7,fontSize:13,fontWeight:700,cursor:"pointer",letterSpacing:.3
+                  }}>🖨 Generate {isTAC100?"Log + Application Record":"Log"}</button>
+                )}
+                {canGen && (
+                  <div style={{fontSize:11,color:"#aaa",marginTop:6,textAlign:"center"}}>
+                    {isTAC100?"Prints Maintenance Log + Pesticide Application Record":"Prints Maintenance Log"}
+                    <br/>Also saved to Saved Logs tab
+                  </div>
+                )}
+
+                <button onClick={()=>setPanel(null)} style={{width:"100%",marginTop:10,padding:"7px",background:"none",border:"1px solid #ddd",borderRadius:7,fontSize:12,color:"#aaa",cursor:"pointer"}}>✕ Close</button>
+              </div>
+            );
+          })()}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Saved Logs Tab ────────────────────────────────────────────────────────────
+function LogsTab({completedLogs, setCompletedLogs}) {
+  const [filter, setFilter] = useState("All");
+  const shown = filter==="All" ? completedLogs : completedLogs.filter(l=>l.listName===filter);
+  return (
+    <div>
+      <h3 style={{color:"#2d5a1b",marginTop:0}}>Saved Logs ({completedLogs.length})</h3>
+      <div style={{display:"flex",gap:8,marginBottom:16,flexWrap:"wrap"}}>
+        {["All",...LISTS].map(l=>(
+          <button key={l} onClick={()=>setFilter(l)} style={{
+            padding:"5px 12px",border:"1.5px solid #2d5a1b",borderRadius:5,
+            background:filter===l?"#2d5a1b":"#fff",color:filter===l?"#fff":"#2d5a1b",
+            fontWeight:filter===l?700:400,fontSize:12
+          }}>{l}</button>
+        ))}
+      </div>
+      {shown.length===0&&<p style={{color:"#aaa",fontSize:13}}>No logs saved yet.</p>}
+      <div style={{display:"flex",flexDirection:"column",gap:8}}>
+        {shown.map(log=>(
+          <div key={log.id} style={{border:"1px solid #ddd",borderRadius:8,padding:"12px 16px",background:"#fff"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12}}>
+              <div style={{flex:1}}>
+                <strong style={{fontSize:14}}>{log.job.name}</strong>
+                <span style={{marginLeft:8,fontSize:11,background:"#e8f0e2",color:"#2d5a1b",padding:"2px 7px",borderRadius:10,fontWeight:700}}>{log.listName}</span>
+                <div style={{fontSize:12,color:"#666",marginTop:3}}>{log.job.date} · {log.job.timeStart}{log.job.timeEnd?` – ${log.job.timeEnd}`:""}</div>
+                <div style={{fontSize:12,color:"#888"}}>{log.job.address}</div>
+                <div style={{fontSize:12,marginTop:3}}>
+                  {log.weather?.sky==="Clear"?"☀️":log.weather?.sky==="Partly Cloudy"?"⛅":"☁️"} {log.weather?.sky}, {log.weather?.temp}°F, {log.weather?.wind} mph {log.weather?.windDir}
+                </div>
+              </div>
+              <div style={{display:"flex",gap:6,flexShrink:0,flexWrap:"wrap",alignItems:"center"}}>
+                <button onClick={()=>printHTML(log.trailsHTML)} style={{padding:"5px 10px",background:"#2d5a1b",color:"#fff",border:"none",borderRadius:5,fontSize:11}}>Log</button>
+                {log.pesticideHTML&&<button onClick={()=>printHTML(log.pesticideHTML)} style={{padding:"5px 10px",background:"#1a3d6e",color:"#fff",border:"none",borderRadius:5,fontSize:11}}>Application</button>}
+                <button onClick={()=>{if(confirm("Delete?"))setCompletedLogs(completedLogs.filter(l=>l.id!==log.id))}}
+                  style={{padding:"5px 8px",background:"none",color:"#c0392b",border:"1px solid #e0c0c0",borderRadius:5,fontSize:11}}>✕</button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Chemicals Tab ─────────────────────────────────────────────────────────────
+function ChemTab({chemDefaults, setChemDefaults}) {
+  const [listName, setListName] = useState("TAC 100");
+  const chem   = chemDefaults[listName]||DEFAULT_CHEM[listName];
+  const update = (f,v) => setChemDefaults({...chemDefaults,[listName]:{...chem,[f]:v}});
+  const fields = [
+    ["pesticide","Pesticide Applied"],["tradeName","Trade Name"],["manufacturer","Manufacturer"],
+    ["tankConc","Tank Mix Concentration"],["epaReg","EPA Reg No."],["epaEst","EPA Est No."],
+    ["applicatorType","Type of Applicator"],["ratePerAcre","Rate of Application (per acre)"],
+    ["gallonsMixture","Gallons of Mixture"],["amountApplied","Amount Applied"],["rateCarrier","Rate of Carrier"],
+  ];
+  return (
+    <div>
+      <h3 style={{color:"#2d5a1b",marginTop:0}}>Chemical Defaults</h3>
+      <p style={{fontSize:13,color:"#666",marginTop:0}}>TAC 100 is the only list that generates an Application Record, but defaults are saved for all lists.</p>
+      <div style={{marginBottom:20}}><ListPicker value={listName} onChange={setListName}/></div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0 20px"}}>
+        {fields.map(([key,label])=>(
+          <div key={key} style={{display:"flex",flexDirection:"column",gap:3,marginBottom:12}}>
+            <label style={{fontSize:11,fontWeight:700,color:"#555",textTransform:"uppercase",letterSpacing:.4}}>{label}</label>
+            <input value={chem[key]||""} onChange={e=>update(key,e.target.value)}
+              style={{padding:"7px 10px",border:"1px solid #bbb",borderRadius:5,fontSize:13}}/>
+          </div>
+        ))}
+      </div>
+      <p style={{fontSize:12,color:"#2d5a1b"}}>✅ Saves automatically.</p>
+    </div>
+  );
+}
+
+// ── App ───────────────────────────────────────────────────────────────────────
+function App() {
+  const [tab, setTab] = useState("Jobs");
+  const [jobLists,      setJobLists]      = useLocalStorage("spraylog_jobs",  {[LISTS[0]]:[],[LISTS[1]]:[],[LISTS[2]]:[],[LISTS[3]]:[]});
+  const [chemDefaults,  setChemDefaults]  = useLocalStorage("spraylog_chem",  DEFAULT_CHEM);
+  const [completedLogs, setCompletedLogs] = useLocalStorage("spraylog_logs",  []);
+
+  const totalJobs = Object.values(jobLists).flat().length;
+
+  return (
+    <div style={{minHeight:"100vh",background:"#f2f5ee",fontFamily:"Georgia,serif"}}>
+      {/* Header */}
+      <div style={{background:"#2d5a1b",padding:"14px 28px",display:"flex",alignItems:"center",gap:14}}>
+        <span style={{fontSize:26}}>🌿</span>
+        <div>
+          <div style={{color:"#fff",fontSize:17,fontWeight:700}}>Spray Log Generator</div>
+          <div style={{color:"#b5d4a0",fontSize:11}}>City of Tulsa / Stormwater Maintenance — Hydromulch Plus of Oklahoma</div>
+        </div>
+        <div style={{marginLeft:"auto",display:"flex",gap:16,fontSize:12,color:"#b5d4a0"}}>
+          <span>📋 {totalJobs} jobs</span>
+          <span>📄 {completedLogs.length} saved</span>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div style={{maxWidth:980,margin:"24px auto",padding:"0 16px"}}>
+        <Tabs tabs={["Jobs","Upload","Saved Logs","Chemicals"]} active={tab} onChange={setTab}/>
+        <div style={{background:"#fff",borderRadius:10,padding:26,boxShadow:"0 2px 12px rgba(0,0,0,.07)"}}>
+          {tab==="Jobs"       && <JobsTab   jobLists={jobLists} chemDefaults={chemDefaults} completedLogs={completedLogs} setCompletedLogs={setCompletedLogs}/>}
+          {tab==="Upload"     && <UploadTab jobLists={jobLists} setJobLists={setJobLists}/>}
+          {tab==="Saved Logs" && <LogsTab   completedLogs={completedLogs} setCompletedLogs={setCompletedLogs}/>}
+          {tab==="Chemicals"  && <ChemTab   chemDefaults={chemDefaults} setChemDefaults={setChemDefaults}/>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
