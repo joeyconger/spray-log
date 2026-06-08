@@ -441,6 +441,8 @@ function JobsTab({jobLists,chemDefaults,completedLogs,setCompletedLogs}) {
   const [listName, setListName] = useState(LISTS[0]);
   const [search, setSearch]     = useState("");
   const [panel, setPanel]       = useState(null);
+  // pendingLog: array of { jobIdx, job, weather } in list order
+  const [pendingLog, setPendingLog] = useState([]);
 
   const jobs     = jobLists[listName]||[];
   const isTAC100 = listName==="TAC 100";
@@ -450,6 +452,9 @@ function JobsTab({jobLists,chemDefaults,completedLogs,setCompletedLogs}) {
         j.code?.toLowerCase().includes(search.toLowerCase())||
         j.address?.toLowerCase().includes(search.toLowerCase()))
     : jobs;
+
+  // Keep pending sorted by original list order
+  const sortedPending = [...pendingLog].sort((a,b)=>a.jobIdx-b.jobIdx);
 
   const openJob = (idx) => {
     if (panel?.jobIdx===idx) { setPanel(null); return; }
@@ -470,18 +475,40 @@ function JobsTab({jobLists,chemDefaults,completedLogs,setCompletedLogs}) {
     }
   };
 
-  const doGenerate = () => {
-    const job   = {...jobs[panel.jobIdx],date:panel.date,timeStart:panel.timeStart,timeEnd:panel.timeEnd};
-    const w     = panel.weather;
-    const chem  = chemDefaults[listName]||DEFAULT_CHEM[listName];
-    printHTML(buildTrailsLogHTML([{job,weather:w}],listName));
-    if (isTAC100) setTimeout(()=>printHTML(buildPesticideHTML(job,w,chem)),800);
-    setCompletedLogs([{
-      id:Date.now(),listName,job,weather:w,chem,
-      trailsHTML:buildTrailsLogHTML([{job,weather:w}],listName),
-      pesticideHTML:isTAC100?buildPesticideHTML(job,w,chem):null,
-      createdAt:new Date().toLocaleString(),
-    },...completedLogs]);
+  const doAddToLog = () => {
+    const job = {...jobs[panel.jobIdx],date:panel.date,timeStart:panel.timeStart,timeEnd:panel.timeEnd};
+    const w   = panel.weather;
+    // Remove existing entry for this job if re-adding, then add fresh
+    const filtered2 = pendingLog.filter(e=>e.jobIdx!==panel.jobIdx);
+    setPendingLog([...filtered2, {jobIdx:panel.jobIdx, job, weather:w}]);
+    setPanel(null);
+  };
+
+  const removeFromLog = (jobIdx) => {
+    setPendingLog(pendingLog.filter(e=>e.jobIdx!==jobIdx));
+  };
+
+  const doPrintLog = () => {
+    if (!sortedPending.length) return;
+    const chem = chemDefaults[listName]||DEFAULT_CHEM[listName];
+    printHTML(buildTrailsLogHTML(sortedPending.map(e=>({job:e.job,weather:e.weather})), listName));
+    if (isTAC100) {
+      setTimeout(()=>{
+        sortedPending.forEach((e,i)=>{
+          setTimeout(()=>printHTML(buildPesticideHTML(e.job,e.weather,chem)), i*800);
+        });
+      }, 800);
+    }
+    // Save all to completed logs
+    const newLogs = sortedPending.map(e=>({
+      id: Date.now()+e.jobIdx,
+      listName, job:e.job, weather:e.weather, chem,
+      trailsHTML: buildTrailsLogHTML([{job:e.job,weather:e.weather}], listName),
+      pesticideHTML: isTAC100?buildPesticideHTML(e.job,e.weather,chem):null,
+      createdAt: new Date().toLocaleString(),
+    }));
+    setCompletedLogs([...newLogs,...completedLogs]);
+    setPendingLog([]);
   };
 
   const counts = Object.fromEntries(LISTS.map(l=>[l,(jobLists[l]||[]).length]));
@@ -491,6 +518,33 @@ function JobsTab({jobLists,chemDefaults,completedLogs,setCompletedLogs}) {
       <div style={{marginBottom:16}}>
         <ListPicker value={listName} onChange={l=>{setListName(l);setPanel(null);setSearch("");}} counts={counts}/>
       </div>
+
+      {/* Pending log bar */}
+      {pendingLog.length>0&&(
+        <div style={{background:"#e8f0e2",border:"1px solid #b5d4a0",borderRadius:8,padding:"10px 14px",marginBottom:16}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+            <span style={{fontWeight:700,fontSize:13,color:"#2d5a1b"}}>{pendingLog.length} job{pendingLog.length!==1?"s":""} in today's log</span>
+            <button onClick={doPrintLog} style={{
+              padding:"7px 18px",background:"#1a3d6e",color:"#fff",border:"none",
+              borderRadius:6,fontSize:12,fontWeight:700,cursor:"pointer"
+            }}>🖨 Print {isTAC100?"Log + Application Records":"Log"}</button>
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:4}}>
+            {sortedPending.map(e=>(
+              <div key={e.jobIdx} style={{display:"flex",justifyContent:"space-between",alignItems:"center",background:"#fff",borderRadius:5,padding:"6px 10px",fontSize:12}}>
+                <div>
+                  <strong>{e.job.name}</strong>
+                  <span style={{color:"#888",marginLeft:8}}>{e.job.timeStart}{e.job.timeEnd?` – ${e.job.timeEnd}`:""}</span>
+                  <span style={{marginLeft:8,fontSize:11,color:"#2d5a1b"}}>
+                    {e.weather?.sky==="Clear"?"☀️":e.weather?.sky==="Partly Cloudy"?"⛅":"☁️"} {e.weather?.temp}°F · {e.weather?.wind}mph {e.weather?.windDir}
+                  </span>
+                </div>
+                <button onClick={()=>removeFromLog(e.jobIdx)} style={{background:"none",border:"none",color:"#c0392b",fontSize:13,padding:"0 4px",cursor:"pointer"}}>✕</button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {jobs.length===0 ? (
         <div style={{padding:40,textAlign:"center",color:"#aaa",border:"2px dashed #ddd",borderRadius:10}}>
@@ -572,13 +626,12 @@ function JobsTab({jobLists,chemDefaults,completedLogs,setCompletedLogs}) {
 
                 {panel.weather&&(
                   <>
-                    <button onClick={doGenerate} style={{
-                      width:"100%",padding:"11px",background:"#1a3d6e",color:"#fff",border:"none",
-                      borderRadius:7,fontSize:13,fontWeight:700,cursor:"pointer",letterSpacing:.3
-                    }}>🖨 Generate {isTAC100?"Log + Application Record":"Log"}</button>
-                    <div style={{fontSize:11,color:"#aaa",marginTop:6,textAlign:"center"}}>
-                      {isTAC100?"Prints Maintenance Log + Pesticide Application Record":"Prints Maintenance Log"}
-                      <br/>Saved to Saved Logs tab
+                    <button onClick={doAddToLog} style={{
+                      width:"100%",padding:"11px",background:"#2d5a1b",color:"#fff",border:"none",
+                      borderRadius:7,fontSize:13,fontWeight:700,cursor:"pointer",letterSpacing:.3,marginBottom:6
+                    }}>+ Add to Log</button>
+                    <div style={{fontSize:11,color:"#aaa",textAlign:"center"}}>
+                      Job will be added to today's log in list order
                     </div>
                   </>
                 )}
