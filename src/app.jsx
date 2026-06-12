@@ -973,7 +973,9 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs }) {
                     border:`1.5px solid ${isActive?"#2d5a1b":inLog?"#b5d4a0":"#e0e0e0"}`,
                     background: isActive?"#2d5a1b":inLog?"#f4faf0":"#fff",
                   }}>
-                    <div style={{fontWeight:600,fontSize:13,color:isActive?"#fff":"#1a1a1a"}}>{job.name}</div>
+                    <div style={{fontWeight:600,fontSize:13,color:isActive?"#fff":"#1a1a1a"}}>
+                      {job.code && <span style={{fontWeight:400,fontSize:11,marginRight:6,opacity:0.7}}>{job.code}</span>}{job.name}
+                    </div>
                     <div style={{fontSize:11,color:isActive?"#b5d4a0":"#999",marginTop:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
                       {job.address}{job.miles?` · ${job.miles} mi`:""}{job.acreage?` · ${job.acreage} ac`:""}
                     </div>
