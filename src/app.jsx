@@ -901,7 +901,6 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs }) {
       createdAt: new Date().toLocaleString(),
     };
     setCompletedLogs([batch, ...completedLogs]);
-    setPending([]);
     setBatchLabel("");
   };
 
