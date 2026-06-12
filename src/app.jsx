@@ -735,22 +735,12 @@ function trailsHTML(entries, listName) {
 function pesticideHTML(job, weather, chem) {
   const f = (label, val, full) =>
     `<div class="field${full?' full':''}"><label>${label}</label><span>${val||""}</span></div>`;
-  return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
-    body{font-family:Arial,sans-serif;font-size:11px;margin:28px 32px;color:#000}
-    h2{text-align:center;font-size:15px;font-weight:bold;letter-spacing:1px;margin-bottom:2px}
-    h3{text-align:center;font-size:12px;margin:0 0 16px}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 20px;margin-bottom:8px}
-    .field{display:flex;flex-direction:column}
-    .field label{font-weight:bold;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#444}
-    .field span{border-bottom:1px solid #888;padding:2px 0;min-height:18px;font-size:12px}
-    .full{grid-column:1/-1}
-    .sig-line{border-top:1px solid #000;margin-top:48px;width:300px;display:inline-block}
-    hr{border:none;border-top:1px solid #ccc;margin:10px 0}
-  </style></head><body>
+  return `<div class="record">
   <h2>Pesticide Application Record</h2>
   <h3>City of Tulsa / Stormwater Maintenance Division</h3><hr/>
   <div class="grid">
     ${f("Date",job.date)} ${f("Time",job.timeStart)}
+    ${f("Job Name",job.name,true)}
     ${f("Location",job.address,true)}
     ${f("Acres Treated",job.acreage||job.miles)} ${f("Target Species","Noxious Vegetation")}
     ${f("Pesticide Applied",chem.pesticide)} ${f("Trade Name",chem.tradeName)}
@@ -766,7 +756,25 @@ function pesticideHTML(job, weather, chem) {
   </div><hr/>
   <p>Applicator Signature: <span class="sig-line"></span></p>
   <p>Notes: _______________________________________________</p>
-  </body></html>`;
+  </div>`;
+}
+
+function pesticideBatchHTML(entries, chem) {
+  const records = entries.map(({job, weather}) => pesticideHTML(job, weather, chem)).join("");
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+    body{font-family:Arial,sans-serif;font-size:11px;margin:0;color:#000}
+    .record{margin:28px 32px;page-break-after:always}
+    .record:last-child{page-break-after:auto}
+    h2{text-align:center;font-size:15px;font-weight:bold;letter-spacing:1px;margin-bottom:2px}
+    h3{text-align:center;font-size:12px;margin:0 0 16px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 20px;margin-bottom:8px}
+    .field{display:flex;flex-direction:column}
+    .field label{font-weight:bold;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#444}
+    .field span{border-bottom:1px solid #888;padding:2px 0;min-height:18px;font-size:12px}
+    .full{grid-column:1/-1}
+    .sig-line{border-top:1px solid #000;margin-top:48px;width:300px;display:inline-block}
+    hr{border:none;border-top:1px solid #ccc;margin:10px 0}
+  </style></head><body>${records}</body></html>`;
 }
 
 function openPrint(html) {
@@ -924,9 +932,7 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs, allP
     const chem = chemDefaults[listName]||DEFAULT_CHEM[listName];
     openPrint(trailsHTML(sorted.map(e => ({job:e.job,weather:e.weather})), listName));
     if (isTAC100) {
-      sorted.forEach((e,i) => {
-        setTimeout(() => openPrint(pesticideHTML(e.job, e.weather, chem)), 800 + i*800);
-      });
+      setTimeout(() => openPrint(pesticideBatchHTML(sorted.map(e => ({job:e.job,weather:e.weather})), chem)), 800);
     }
     const batch = {
       id: Date.now(), isBatch: true, label: label || listName, listName, chem,
@@ -1125,9 +1131,7 @@ function LogsTab({ completedLogs, setCompletedLogs }) {
     const chem = log.chem || DEFAULT_CHEM[log.listName];
     openPrint(trailsHTML(log.entries, log.listName));
     if (log.listName==="TAC 100") {
-      log.entries.forEach((e,i) => {
-        setTimeout(() => openPrint(pesticideHTML(e.job, e.weather, chem)), 800 + i*800);
-      });
+      setTimeout(() => openPrint(pesticideBatchHTML(log.entries, chem)), 800);
     }
   };
 
@@ -1164,7 +1168,7 @@ function LogsTab({ completedLogs, setCompletedLogs }) {
                   <>
                     <button onClick={() => openPrint(trailsHTML([{job:log.job,weather:log.weather}],log.listName))} style={{padding:"5px 10px",background:"#2d5a1b",color:"#fff",border:"none",borderRadius:5,fontSize:11}}>Log</button>
                     {log.listName==="TAC 100" && (
-                      <button onClick={() => openPrint(pesticideHTML(log.job,log.weather,log.chem||DEFAULT_CHEM[log.listName]))} style={{padding:"5px 10px",background:"#1a3d6e",color:"#fff",border:"none",borderRadius:5,fontSize:11}}>Application</button>
+                      <button onClick={() => openPrint(pesticideBatchHTML([{job:log.job,weather:log.weather}],log.chem||DEFAULT_CHEM[log.listName]))} style={{padding:"5px 10px",background:"#1a3d6e",color:"#fff",border:"none",borderRadius:5,fontSize:11}}>Application</button>
                     )}
                   </>
                 )}
