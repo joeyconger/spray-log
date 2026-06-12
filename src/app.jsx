@@ -132,13 +132,11 @@ function parseExcel(arrayBuffer) {
   };
   const cols = Object.fromEntries(Object.keys(FIELD_MAP).map(f => [f, colFor(f)]));
 
-  // Data rows start after the header row; skip any that look like sub-headers
+  // Data rows: must have a numeric value in the code/item column (or first col), skips continuation rows and sub-headers
+  const itemCol = cols.code !== null ? cols.code : 0;
   const dataRows = rows.slice(headerRowIdx + 1).filter(row => {
-    const first = String(row[0]||"").trim();
-    // Skip empty rows and sub-header rows (where first cell is non-numeric text matching an alias)
-    if (!row.some(c => String(c).trim())) return false;
-    if (isNaN(first) && ALL_ALIASES.includes(first.toLowerCase())) return false;
-    return true;
+    const first = String(row[itemCol]||"").trim();
+    return first !== "" && !isNaN(first);
   });
 
   // Use address col as name if no dedicated name col (common in these sheets)
