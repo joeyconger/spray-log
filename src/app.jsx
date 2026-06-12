@@ -106,31 +106,56 @@ function parseExcel(arrayBuffer) {
   const wb = XLSX.read(arrayBuffer, { type: 'array' });
   const ws = wb.Sheets[wb.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
-  if (rows.length < 2) return { jobs: [], headers: [] };
 
   const FIELD_MAP = {
     name:       ["name","job name","site name","job","title"],
     address:    ["address","addr","street","street address","location","site","place"],
-    code:       ["code","job code","id","job id","job #","#"],
+    code:       ["code","job code","id","job id","job #","#","item","item #","item no"],
     miles:      ["miles","mi","distance"],
     linearFeet: ["linear feet","linear ft","linear","lin ft","lin feet","lf"],
-    acreage:    ["acreage","acres","ac"],
+    acreage:    ["acreage","acres","ac","area"],
   };
-  const headers = rows[0].map(h => String(h).trim().toLowerCase());
+  const ALL_ALIASES = Object.values(FIELD_MAP).flat();
+
+  // Find the header row: first row where any cell matches a known alias
+  let headerRowIdx = -1;
+  for (let i = 0; i < Math.min(rows.length, 10); i++) {
+    const cells = rows[i].map(h => String(h).trim().toLowerCase());
+    if (cells.some(c => ALL_ALIASES.includes(c))) { headerRowIdx = i; break; }
+  }
+  if (headerRowIdx === -1) return { jobs: [], headers: [] };
+
+  const headers = rows[headerRowIdx].map(h => String(h).trim().toLowerCase());
   const colFor = field => {
     const idx = headers.findIndex(h => FIELD_MAP[field].includes(h));
     return idx === -1 ? null : idx;
   };
   const cols = Object.fromEntries(Object.keys(FIELD_MAP).map(f => [f, colFor(f)]));
 
-  // If no name column found, fall back to first column
-  if (cols.name === null) cols.name = 0;
+  // Data rows start after the header row; skip any that look like sub-headers
+  const dataRows = rows.slice(headerRowIdx + 1).filter(row => {
+    const first = String(row[0]||"").trim();
+    // Skip empty rows and sub-header rows (where first cell is non-numeric text matching an alias)
+    if (!row.some(c => String(c).trim())) return false;
+    if (isNaN(first) && ALL_ALIASES.includes(first.toLowerCase())) return false;
+    return true;
+  });
 
-  const jobs = rows.slice(1)
-    .filter(row => row.some(c => String(c).trim()))
+  // Use address col as name if no dedicated name col (common in these sheets)
+  const nameCol  = cols.name !== null ? cols.name : cols.address;
+  const addrCol  = cols.address;
+
+  const jobs = dataRows
     .map(row => {
-      const get = f => cols[f] !== null ? String(row[cols[f]]||"").trim() : "";
-      return { name:get("name"), address:get("address"), code:get("code"), miles:get("miles"), linearFeet:get("linearFeet"), acreage:get("acreage") };
+      const get = col => col !== null ? String(row[col]||"").trim() : "";
+      return {
+        name:       get(nameCol),
+        address:    addrCol !== nameCol ? get(addrCol) : "",
+        code:       get(cols.code),
+        miles:      get(cols.miles),
+        linearFeet: get(cols.linearFeet),
+        acreage:    get(cols.acreage),
+      };
     })
     .filter(j => j.name);
 
