@@ -340,6 +340,62 @@ const TAC_295_BIG_LINED_CHANNELS = [
   {code:"LC2105",name:"FRED CREEK",address:"7400 S. FLORENCE",miles:"",linearFeet:"",acreage:"2.04"},
 ];
 
+const TRAILS_JOBS = [
+  {code:"",name:"AARONSON",address:"5000 S 87 E AVE",miles:"0.59",linearFeet:"3115",acreage:""},
+  {code:"",name:"ALSUMA",address:"5100 S MINGO RD",miles:"0.74",linearFeet:"3990",acreage:""},
+  {code:"",name:"CHERRY CREEK",address:"4800 S ELWOOD AVE",miles:"1.48",linearFeet:"7840",acreage:""},
+  {code:"",name:"DIRTY BUTTER",address:"3000 N PEORIA",miles:"0.25",linearFeet:"3101",acreage:""},
+  {code:"",name:"FORD",address:"4700 S 109 E AVE",miles:"1.06",linearFeet:"5575",acreage:""},
+  {code:"",name:"GLEN EAGLES",address:"6100 S 94 E AVE",miles:"0.10",linearFeet:"536",acreage:""},
+  {code:"",name:"OSAGE",address:"1101 W PINE ST",miles:"1.01",linearFeet:"5332.80",acreage:""},
+  {code:"",name:"PORKCHOP",address:"1100 S MINGO RD",miles:"1.20",linearFeet:"6336",acreage:""},
+  {code:"",name:"REDFORD",address:"2100 S 101 E AVE",miles:"0.84",linearFeet:"4435",acreage:""},
+  {code:"",name:"TUPELO",address:"1500 S 115 E AVE",miles:"0.98",linearFeet:"5199",acreage:""},
+  {code:"",name:"GREENWOOD NORTH",address:"701 E MARSHALL ST",miles:"0.61",linearFeet:"3224.79",acreage:""},
+  {code:"",name:"GREENWOOD SOUTH",address:"620 E LATIMER ST",miles:"0.46",linearFeet:"2428.80",acreage:""},
+  {code:"",name:"JOE CREEK",address:"6100 S YORKTOWN AVE",miles:"1.28",linearFeet:"6765",acreage:""},
+  {code:"",name:"JOE CREEK",address:"5400 S EVANSTON",miles:"0.31",linearFeet:"2686",acreage:""},
+  {code:"",name:"MINGO TRAIL (NORTH OF PINE)",address:"10500 E PINE",miles:"0.52",linearFeet:"2750",acreage:""},
+  {code:"",name:"MINGO TRAIL (SOUTH OF PINE)",address:"10500 E PINE",miles:"0.87",linearFeet:"4593",acreage:""},
+  {code:"",name:"MINGO TRAIL",address:"200 S 94 E AVE",miles:"0.80",linearFeet:"6120",acreage:""},
+  {code:"",name:"MINGO TRAIL",address:"1200 S 93 E AVE",miles:"0.83",linearFeet:"6137",acreage:""},
+  {code:"",name:"NELSON TRAIL",address:"2501 S 92 E AVE",miles:"0.93",linearFeet:"4910",acreage:""},
+  {code:"",name:"LONGVIEW TRAIL",address:"2626 S 96 E AVE",miles:"0.59",linearFeet:"3130",acreage:""},
+  {code:"",name:"CAMELOT TRAIL",address:"10300 S GRANITE",miles:"0.49",linearFeet:"2600",acreage:""},
+  {code:"",name:"EAST CENTRAL",address:"12400 E 11 CT",miles:"0.76",linearFeet:"4012",acreage:""},
+  {code:"",name:"JOE CREEK MAIN (B)",address:"7200 S TRENTON",miles:"0.45",linearFeet:"4535",acreage:""},
+  {code:"",name:"JONES EXTENSION",address:"1419 S 79 E AVE",miles:"0.19",linearFeet:"1003",acreage:""},
+  {code:"",name:"PIPE YARD (LB7-U2)",address:"1350 S JOPLIN",miles:"0.46",linearFeet:"2450",acreage:""},
+  {code:"",name:"LEWIS AND CLARK",address:"1000 S GARNETT",miles:"0.56",linearFeet:"2975",acreage:""},
+  {code:"",name:"MILL CREEK",address:"8300 E 11 PL",miles:"0.58",linearFeet:"3062",acreage:""},
+  {code:"",name:"MINGO CREEK",address:"3500 S MINGO",miles:"0.63",linearFeet:"5567",acreage:""},
+  {code:"",name:"MOOSER CREEK (Redfork)",address:"2700 W 68 ST",miles:"0.06",linearFeet:"316.80",acreage:""},
+  {code:"",name:"BROOKWOOD",address:"8100 S YALE",miles:"0.48",linearFeet:"2538",acreage:""},
+  {code:"",name:"OSAGE",address:"3000 N CINCINNATI",miles:"0.21",linearFeet:"1108.80",acreage:""},
+  {code:"",name:"OSAGE",address:"2900 N CINCINNATI",miles:"0.19",linearFeet:"1003",acreage:""},
+  {code:"",name:"GOLDEN VALLEY",address:"6100 S GARNETT",miles:"1.27",linearFeet:"6705",acreage:""},
+  {code:"",name:"BROOKHOLLOW",address:"3000 S 119 E AVE",miles:"0.84",linearFeet:"4435",acreage:""},
+  {code:"",name:"STREET WIDENING POND",address:"2400 S GARNETT",miles:"0.40",linearFeet:"2112",acreage:""},
+  {code:"",name:"COOLEY B",address:"11391 E ARCHER",miles:"0.27",linearFeet:"1425",acreage:""},
+  {code:"",name:"COOLEY C",address:"1003 N 129 E AVE",miles:"0.24",linearFeet:"1267",acreage:""},
+  {code:"",name:"CAROL WILLIAMS",address:"600 S MINGO",miles:"0.89",linearFeet:"4699",acreage:""},
+  {code:"",name:"HAMPTON SOUTH POND",address:"7500 S GARNETT",miles:"0.35",linearFeet:"2146",acreage:""},
+  {code:"",name:"HAMPTON SOUTH CHANNEL",address:"7500 S GARNETT",miles:"0.39",linearFeet:"2400",acreage:""},
+  {code:"",name:"OXY POND",address:"4100 S 118 E AVE",miles:"0.77",linearFeet:"4065",acreage:""},
+  {code:"",name:"WALMART (W.R.A.P.)",address:"10938 S MEMORIAL DR",miles:"0.70",linearFeet:"3596",acreage:""},
+  {code:"",name:"SMITTLE",address:"2200 S 133RD E AVE",miles:"0.40",linearFeet:"4036",acreage:""},
+  {code:"",name:"ALEXANDER TRUST",address:"4500 S 91 E AVE",miles:"0.74",linearFeet:"4043",acreage:""},
+  {code:"",name:"AUDUBON CHANNEL",address:"6600 S 31ST ST",miles:"",linearFeet:"605",acreage:""},
+  {code:"",name:"DIRTY BUTTER CHANNEL",address:"3001 N PEORIA",miles:"",linearFeet:"1889",acreage:""},
+  {code:"",name:"CHURCH ON THE MOVE COOLEY",address:"1300 N 129TH E AVE",miles:"",linearFeet:"632",acreage:""},
+  {code:"",name:"MINSHALL POND",address:"7600 S SHERIDAN",miles:"",linearFeet:"2621",acreage:""},
+  {code:"",name:"BISHOP TRACT",address:"3600 S 103RD E AVE",miles:"",linearFeet:"6325",acreage:""},
+  {code:"",name:"REDFORK CHANNEL",address:"4100 S UNION",miles:"",linearFeet:"523",acreage:""},
+  {code:"",name:"JONES POND II",address:"1500 S 79TH E AVE",miles:"",linearFeet:"536",acreage:""},
+  {code:"",name:"COOLEY CHANNEL",address:"10200 E ADMIRAL PL",miles:"",linearFeet:"3215",acreage:""},
+  {code:"",name:"WILDFLOWER MEADOW",address:"1031 E 33RD PL",miles:"0.10",linearFeet:"529",acreage:""},
+];
+
 const TAC_100_JOBS = [
   {code:"1",name:"1700 S. 119th E. Ave",address:"",miles:"",linearFeet:"",acreage:"4.1"},
   {code:"2",name:"3100 S. 101st E. Ave",address:"",miles:"",linearFeet:"",acreage:"8.67"},
@@ -1013,7 +1069,7 @@ function ChemTab({ chemDefaults, setChemDefaults }) {
 function App() {
   const [tab, setTab]                     = useState("Jobs");
   const [ready, setReady]                 = useState(false);
-  const [jobLists, setJobLists]           = useLS("spraylog_jobs",  {"TAC 100":TAC_100_JOBS,"TAC 295 Big Spray":[...TAC_295_BIG_ACQUISITION_LOTS,...TAC_295_BIG_DETENTION_PONDS,...TAC_295_BIG_EARTHEN_CHANNELS,...TAC_295_BIG_LINED_CHANNELS],[LISTS[2]]:[],[LISTS[3]]:[]}, "/api/job-lists");
+  const [jobLists, setJobLists]           = useLS("spraylog_jobs",  {"TAC 100":TAC_100_JOBS,"TAC 295 Big Spray":[...TAC_295_BIG_ACQUISITION_LOTS,...TAC_295_BIG_DETENTION_PONDS,...TAC_295_BIG_EARTHEN_CHANNELS,...TAC_295_BIG_LINED_CHANNELS],[LISTS[2]]:[],"Trails":TRAILS_JOBS}, "/api/job-lists");
   const [chemDefaults, setChemDefaults]   = useLS("spraylog_chem",  DEFAULT_CHEM, "/api/chem-defaults");
   const [completedLogs, setCompletedLogs] = useLS("spraylog_logs",  [], "/api/logs");
   const totalJobs = Object.values(jobLists).flat().length;
@@ -1025,7 +1081,7 @@ function App() {
         if (data.logs?.length)                                          setCompletedLogs(data.logs);
         // Always use hard-coded TAC 100; merge other lists from server
         if (data.jobLists) {
-          setJobLists(prev => ({ ...data.jobLists, "TAC 100": TAC_100_JOBS, "TAC 295 Big Spray": [...TAC_295_BIG_ACQUISITION_LOTS, ...TAC_295_BIG_DETENTION_PONDS, ...TAC_295_BIG_EARTHEN_CHANNELS, ...TAC_295_BIG_LINED_CHANNELS] }));
+          setJobLists(prev => ({ ...data.jobLists, "TAC 100": TAC_100_JOBS, "TAC 295 Big Spray": [...TAC_295_BIG_ACQUISITION_LOTS, ...TAC_295_BIG_DETENTION_PONDS, ...TAC_295_BIG_EARTHEN_CHANNELS, ...TAC_295_BIG_LINED_CHANNELS], "Trails": TRAILS_JOBS }));
         }
       }
       setReady(true);
