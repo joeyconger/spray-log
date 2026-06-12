@@ -935,9 +935,12 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs }) {
         <div style={{background:"#e8f0e2",border:"1px solid #b5d4a0",borderRadius:8,padding:"10px 14px",marginBottom:16}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
             <span style={{fontWeight:700,fontSize:13,color:"#2d5a1b"}}>{pending.length} job{pending.length!==1?"s":""} in log</span>
-            <button onClick={() => sorted.length && setShowLabel(true)} style={{padding:"7px 18px",background:"#1a3d6e",color:"#fff",border:"none",borderRadius:6,fontSize:12,fontWeight:700}}>
-              🖨 Print {isTAC100 ? "Log + Application Records" : "Log"}
-            </button>
+            <div style={{display:"flex",gap:8}}>
+              <button onClick={() => { if(confirm("Clear all jobs from the queue?")) setPending([]); }} style={{padding:"7px 12px",background:"none",color:"#c0392b",border:"1.5px solid #c0392b",borderRadius:6,fontSize:12,fontWeight:600}}>Clear All</button>
+              <button onClick={() => sorted.length && setShowLabel(true)} style={{padding:"7px 18px",background:"#1a3d6e",color:"#fff",border:"none",borderRadius:6,fontSize:12,fontWeight:700}}>
+                🖨 Print {isTAC100 ? "Log + Application Records" : "Log"}
+              </button>
+            </div>
           </div>
 
           {showLabel && (
