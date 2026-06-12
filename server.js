@@ -70,4 +70,4 @@ app.get('/api/all', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Spray Log running → http://localhost:${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`Spray Log running on port ${PORT}`));
