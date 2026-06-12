@@ -1,8 +1,84 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
-import * as XLSX from 'xlsx';
 
 const LISTS = ["TAC 100", "TAC 295 Big Spray", "TAC 295 Small Spray", "Trails"];
+
+const TAC_100_JOBS = [
+  {code:"1",name:"1700 S. 119th E. Ave",address:"",miles:"",linearFeet:"",acreage:"4.1"},
+  {code:"2",name:"3100 S. 101st E. Ave",address:"",miles:"",linearFeet:"",acreage:"8.67"},
+  {code:"3",name:"3100 S. 108th E. Ave",address:"",miles:"",linearFeet:"",acreage:"1.9"},
+  {code:"4",name:"3800 Block S. Mingo Valley Exp HWY 169",address:"",miles:"",linearFeet:"",acreage:"5.16"},
+  {code:"5",name:"8800 Block E. BA Exp",address:"",miles:"",linearFeet:"",acreage:"1.9"},
+  {code:"6",name:"3500 S. 88th E. Ave",address:"",miles:"",linearFeet:"",acreage:"3.16"},
+  {code:"7",name:"Joe Creek - 7100 S. to Riverside",address:"",miles:"",linearFeet:"",acreage:"28.62"},
+  {code:"8",name:"Joe Creek - 6300 S. to 71st St.",address:"",miles:"",linearFeet:"",acreage:"26.34"},
+  {code:"9",name:"4100 N. Cincinnati (Flat Rock)",address:"",miles:"",linearFeet:"",acreage:"24.82"},
+  {code:"10",name:"4800 N. Iroquois (Valley View) to Flatrock creek",address:"",miles:"",linearFeet:"",acreage:"7.74"},
+  {code:"11",name:"6700 S. 90th E. Ave",address:"",miles:"",linearFeet:"",acreage:"5.71"},
+  {code:"12",name:"5500 S. Garnett Rd",address:"",miles:"",linearFeet:"",acreage:"2.08"},
+  {code:"13",name:"Mingo Creek - I-244 S. to Mingo Rd",address:"",miles:"",linearFeet:"",acreage:"14.11"},
+  {code:"14",name:"Mingo Creek - 5100 S. to 5800 S.",address:"",miles:"",linearFeet:"",acreage:"17.37"},
+  {code:"15",name:"4700 S Elwood Cherry Creek Lined channel",address:"",miles:"",linearFeet:"",acreage:"12.5"},
+  {code:"16",name:"6540 S. Lewis Ave",address:"",miles:"",linearFeet:"",acreage:"0.65"},
+  {code:"17",name:"Parkview Cannel 120 S 41st W Ave",address:"",miles:"",linearFeet:"",acreage:"13.79"},
+  {code:"18",name:"8009 S. 77th E. Ave",address:"",miles:"",linearFeet:"",acreage:"0.21"},
+  {code:"19",name:"9100 E. 41st St.",address:"",miles:"",linearFeet:"",acreage:"0.06"},
+  {code:"20",name:"4100 S. 87th E. Ave",address:"",miles:"",linearFeet:"",acreage:"0.14"},
+  {code:"21",name:"4100 S. 112th E. Ave",address:"",miles:"",linearFeet:"",acreage:"1.55"},
+  {code:"22",name:"12188 E. 21st Ct.",address:"",miles:"",linearFeet:"",acreage:"0.16"},
+  {code:"23",name:"1520 S. Memorial Dr",address:"",miles:"",linearFeet:"",acreage:"0.23"},
+  {code:"24",name:"1420 S. Joplin Ave",address:"",miles:"",linearFeet:"",acreage:"0.32"},
+  {code:"25",name:"11124 E. 11th Ct",address:"",miles:"",linearFeet:"",acreage:"0.6"},
+  {code:"26",name:"7300 E. Admiral Pl",address:"",miles:"",linearFeet:"",acreage:"0.24"},
+  {code:"27",name:"2740 N. Maplewood Ave",address:"",miles:"",linearFeet:"",acreage:"0.15"},
+  {code:"28",name:"2317 N. Atlanta Ave",address:"",miles:"",linearFeet:"",acreage:"0.09"},
+  {code:"29",name:"3500 N. Columbia Ave",address:"",miles:"",linearFeet:"",acreage:"0.92"},
+  {code:"30",name:"2817 N Hartford Ave.",address:"",miles:"",linearFeet:"",acreage:"1"},
+  {code:"31",name:"5000 N. Cincinnati Ave",address:"",miles:"",linearFeet:"",acreage:"0.68"},
+  {code:"32",name:"4700 W. Edison St.",address:"",miles:"",linearFeet:"",acreage:"0.04"},
+  {code:"33",name:"6535 E Skelly Drive",address:"",miles:"",linearFeet:"",acreage:"0.19"},
+  {code:"34",name:"36th St. N. & Hwy 169, Mingo Channel (Bottom only)",address:"",miles:"",linearFeet:"",acreage:"21.38"},
+  {code:"35",name:"Mingo Main stem Pine to I-244 (Bottom only)",address:"",miles:"",linearFeet:"",acreage:"55"},
+  {code:"36",name:"Mingo Mainstem -  from Pine N. to RR bridge",address:"",miles:"",linearFeet:"",acreage:"20.86"},
+  {code:"37",name:"Mingo Channel 2nd and Mingo Bridge to 21 st",address:"",miles:"",linearFeet:"",acreage:"28.86"},
+  {code:"38",name:"1250 N Mingo Lower Mingo Tribs",address:"",miles:"",linearFeet:"",acreage:"1.1"},
+  {code:"39",name:"5600 N Elgin Valley View Channel from",address:"",miles:"",linearFeet:"",acreage:"6.23"},
+  {code:"40",name:"11700 E Archer cooley creek riprap",address:"",miles:"",linearFeet:"",acreage:"1.05"},
+  {code:"41",name:"10759 E Admiral - riprap in safety training center",address:"",miles:"",linearFeet:"",acreage:"5"},
+  {code:"42",name:"Mingo Mainstrem Riprap from mingo road",address:"",miles:"",linearFeet:"",acreage:"1"},
+  {code:"43",name:"Mingo Mainstrem Riprap and Fabrimform",address:"",miles:"",linearFeet:"",acreage:"9.05"},
+  {code:"44",name:"2800 S 132 E Ave- Brookhollow channel riprap",address:"",miles:"",linearFeet:"",acreage:"5.5"},
+  {code:"45",name:"3100 S 118 E Ave - riprap in creek on the north",address:"",miles:"",linearFeet:"",acreage:"4"},
+  {code:"46",name:"3100 S Garnett - riprap North of shopping centers",address:"",miles:"",linearFeet:"",acreage:"2.5"},
+  {code:"47",name:"Bell Creek 3900 S 89 E Ave riprap areas from the BA",address:"",miles:"",linearFeet:"",acreage:"3.5"},
+  {code:"48",name:"Mingo Mainstem - 4100 S 103 E Ave - riprap thru",address:"",miles:"",linearFeet:"",acreage:"5"},
+  {code:"49",name:"Bell Creek 46TH St. south to Aaronson Park.",address:"",miles:"",linearFeet:"",acreage:"3"},
+  {code:"50",name:"Mingo Mainstream Riprap west of mingo RD.",address:"",miles:"",linearFeet:"",acreage:"2.5"},
+  {code:"51",name:"Lil Haikey - 9100 S 89 E Ave - fabriform and trickle trail",address:"",miles:"",linearFeet:"",acreage:"4"},
+  {code:"52",name:"Brookhollow Creek 110th E. Ave. 32nd st s Riprap",address:"",miles:"",linearFeet:"",acreage:"2.4"},
+  {code:"53",name:"Fred Creek 7400 S harvard east of harvard",address:"",miles:"",linearFeet:"",acreage:"4"},
+  {code:"54",name:"Fred Creek 7400 S Harvard Lined Channel West of harvard",address:"",miles:"",linearFeet:"",acreage:"5.04"},
+  {code:"55",name:"Fred Creek 8100 S Wheeling",address:"",miles:"",linearFeet:"",acreage:"1.59"},
+  {code:"56",name:"5100 S Lynn Lane from 4800 S to 5100 S on the west",address:"",miles:"",linearFeet:"",acreage:"1.51"},
+  {code:"57",name:"520 E 56th St N - Valley view 56th St N South to 48th PL",address:"",miles:"",linearFeet:"",acreage:"6"},
+  {code:"58",name:"500 S Mingo - Tupelo creek east of Mingo rd",address:"",miles:"",linearFeet:"",acreage:"6"},
+  {code:"59",name:"101st Delaware Dr. (School)",address:"",miles:"",linearFeet:"",acreage:"1.1"},
+  {code:"60",name:"9800 S. Delaware Dr.",address:"",miles:"",linearFeet:"",acreage:"2.1"},
+  {code:"61",name:"Vensel Creek - 97 S. Delaware",address:"",miles:"",linearFeet:"",acreage:"5.5"},
+  {code:"62",name:"Valley  View 46 st north to Iroquois Ave.",address:"",miles:"",linearFeet:"",acreage:"1.5"},
+  {code:"63",name:"Mingo creek from 31st to 41st rip rap",address:"",miles:"",linearFeet:"",acreage:"1.5"},
+  {code:"64",name:"America Lines Brake Shop 11501 E PINE",address:"",miles:"",linearFeet:"",acreage:"2"},
+  {code:"65",name:"4700 S Jamestown",address:"",miles:"",linearFeet:"",acreage:"4.24"},
+  {code:"66",name:"1300 N New Haven",address:"",miles:"",linearFeet:"",acreage:"0.94"},
+  {code:"67",name:"4700 BLK HWY 169",address:"",miles:"",linearFeet:"",acreage:"5"},
+  {code:"68",name:"Mingo Creek Liner to 41st 2700 S 95th E Ave",address:"",miles:"",linearFeet:"",acreage:"19.1"},
+  {code:"69",name:"6800 S Lewis",address:"",miles:"",linearFeet:"",acreage:"0.98"},
+  {code:"70",name:"9800  S 74th E Ave",address:"",miles:"",linearFeet:"",acreage:"0.51"},
+  {code:"71",name:"3200 S Peoria",address:"",miles:"",linearFeet:"",acreage:"2.5"},
+  {code:"72",name:"11900 E 21st St S",address:"",miles:"",linearFeet:"",acreage:"1"},
+  {code:"73",name:"4500 S 93rd E Ave",address:"",miles:"",linearFeet:"",acreage:"3.1"},
+  {code:"74",name:"Mingo Mainstem Riprap from Mingo Rd to 11th St S",address:"",miles:"",linearFeet:"",acreage:"7"},
+];
 
 const DEFAULT_CHEM = {
   "TAC 100":             { pesticide:"Glyphosate", tradeName:"Round Up Custom", manufacturer:"Monsanto", tankConc:"1%", epaReg:"524-343", epaEst:"524-IA-1", applicatorType:"Recirculating Sprayer", ratePerAcre:"12 oz per acre", gallonsMixture:"", amountApplied:"", rateCarrier:"" },
@@ -101,85 +177,6 @@ async function getWeather(lat, lon, dateStr, timeStr) {
   return result;
 }
 
-// ── Job list parser ───────────────────────────────────────────────────────────
-function parseExcel(arrayBuffer) {
-  const wb = XLSX.read(arrayBuffer, { type: 'array' });
-  const ws = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
-
-  const FIELD_MAP = {
-    name:       ["name","job name","site name","job","title"],
-    address:    ["address","addr","street","street address","location","site","place"],
-    code:       ["code","job code","id","job id","job #","#","item","item #","item no"],
-    miles:      ["miles","mi","distance"],
-    linearFeet: ["linear feet","linear ft","linear","lin ft","lin feet","lf"],
-    acreage:    ["acreage","acres","ac","area"],
-  };
-  const ALL_ALIASES = Object.values(FIELD_MAP).flat();
-
-  // Find the header row: first row where any cell matches a known alias
-  let headerRowIdx = -1;
-  for (let i = 0; i < Math.min(rows.length, 10); i++) {
-    const cells = rows[i].map(h => String(h).trim().toLowerCase());
-    if (cells.some(c => ALL_ALIASES.includes(c))) { headerRowIdx = i; break; }
-  }
-  if (headerRowIdx === -1) return { jobs: [], headers: [] };
-
-  const headers = rows[headerRowIdx].map(h => String(h).trim().toLowerCase());
-  const colFor = field => {
-    const idx = headers.findIndex(h => FIELD_MAP[field].includes(h));
-    return idx === -1 ? null : idx;
-  };
-  const cols = Object.fromEntries(Object.keys(FIELD_MAP).map(f => [f, colFor(f)]));
-
-  // Data rows: must have a numeric value in the code/item column (or first col), skips continuation rows and sub-headers
-  const itemCol = cols.code !== null ? cols.code : 0;
-  const dataRows = rows.slice(headerRowIdx + 1).filter(row => {
-    const first = String(row[itemCol]||"").trim();
-    return first !== "" && !isNaN(first);
-  });
-
-  // Use address col as name if no dedicated name col (common in these sheets)
-  const nameCol  = cols.name !== null ? cols.name : cols.address;
-  const addrCol  = cols.address;
-
-  const jobs = dataRows
-    .map(row => {
-      const get = col => col !== null ? String(row[col]||"").trim() : "";
-      return {
-        name:       get(nameCol),
-        address:    addrCol !== nameCol ? get(addrCol) : "",
-        code:       get(cols.code),
-        miles:      get(cols.miles),
-        linearFeet: get(cols.linearFeet),
-        acreage:    get(cols.acreage),
-      };
-    })
-    .filter(j => j.name);
-
-  return { jobs, headers };
-}
-
-function parseJobs(text) {
-  const SKIP = /^(maintenance trails|date|name|address|miles|linear feet|linear ft|acreage|\d+|\s*✕\s*)$/i;
-  const IS_ADDR = /^\d+\s+[a-z]/i;
-  const IS_NUM  = /^\d+(\.\d+)?$/;
-  const lines = text.split(/\n/).map(l => l.replace(/\t.*/,"").trim()).filter(l => l && !SKIP.test(l));
-  const jobs = [];
-  let i = 0;
-  while (i < lines.length) {
-    const line = lines[i];
-    const isName = !IS_ADDR.test(line) && !IS_NUM.test(line) && /[a-zA-Z]/.test(line) && line.length >= 3;
-    if (!isName) { i++; continue; }
-    const job = { code:"", name:line, address:"", miles:"", linearFeet:"", acreage:"" };
-    i++;
-    if (i < lines.length && IS_ADDR.test(lines[i])) { job.address = lines[i]; i++; }
-    if (i < lines.length && IS_NUM.test(lines[i]) && parseFloat(lines[i]) < 50) { job.miles = lines[i]; i++; }
-    if (i < lines.length && IS_NUM.test(lines[i])) { job.linearFeet = lines[i]; i++; }
-    jobs.push(job);
-  }
-  return jobs;
-}
 
 // ── Print builders ────────────────────────────────────────────────────────────
 function trailsHTML(entries, listName) {
@@ -302,177 +299,6 @@ function WeatherBox({ weather }) {
   );
 }
 
-// ── Upload Tab ────────────────────────────────────────────────────────────────
-function UploadTab({ jobLists, setJobLists }) {
-  const [list, setList]         = useState(LISTS[0]);
-  const [mode, setMode]         = useState("paste");
-  const [pasteText, setPaste]   = useState("");
-  const [loading, setLoading]   = useState(false);
-  const [status, setStatus]     = useState("");
-  const [dragOver, setDragOver] = useState(false);
-  const fileRef = useRef();
-  const blankJob = { code:"", name:"", address:"", miles:"", linearFeet:"", acreage:"" };
-  const [draft, setDraft] = useState(blankJob);
-  const counts = Object.fromEntries(LISTS.map(l => [l, (jobLists[l]||[]).length]));
-
-  const handleFile = async file => {
-    if (!file) return;
-    const ext = file.name.split(".").pop().toLowerCase();
-    if (!["docx","txt","xlsx","xls"].includes(ext)) { setStatus("❌ Use .xlsx, .xls, .docx, or .txt"); return; }
-    setLoading(true); setStatus("Extracting…");
-    try {
-      if (ext==="xlsx" || ext==="xls") {
-        const ab = await file.arrayBuffer();
-        const { jobs, headers } = parseExcel(ab);
-        if (!jobs.length) { setStatus(`❌ No jobs found. Headers detected: ${headers.join(", ") || "none"}`); setLoading(false); return; }
-        setJobLists({...jobLists, [list]: jobs});
-        setStatus(`✅ Imported ${jobs.length} jobs from "${file.name}" to "${list}"`);
-      } else if (ext==="docx") {
-        if (!window.mammoth) {
-          await new Promise((resolve, reject) => {
-            const s = document.createElement('script');
-            s.src = "https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js";
-            s.onload = resolve; s.onerror = reject;
-            document.head.appendChild(s);
-          });
-        }
-        const ab = await file.arrayBuffer();
-        const res = await mammoth.extractRawText({ arrayBuffer: ab });
-        setPaste(res.value||""); setMode("paste");
-        setStatus("✅ Text extracted — review then click Parse & Save");
-      } else {
-        setPaste(await file.text()); setMode("paste");
-        setStatus("✅ Text loaded — review then click Parse & Save");
-      }
-    } catch(e) { setStatus("❌ "+e.message); }
-    setLoading(false);
-  };
-
-  const doParse = () => {
-    const jobs = parseJobs(pasteText);
-    if (!jobs.length) { setStatus("❌ No jobs found — check format"); return; }
-    setJobLists({...jobLists, [list]: jobs});
-    setStatus(`✅ Saved ${jobs.length} jobs to "${list}"`);
-    setPaste("");
-  };
-
-  const doAdd = () => {
-    if (!draft.name.trim()) { setStatus("⚠️ Name required"); return; }
-    setJobLists({...jobLists, [list]: [...(jobLists[list]||[]), draft]});
-    setDraft(blankJob);
-    setStatus(`✅ Added "${draft.name}"`);
-  };
-
-  return (
-    <div>
-      <h3 style={{color:"#2d5a1b",marginTop:0}}>Manage Job Lists</h3>
-      <div style={{marginBottom:16}}>
-        <div style={{fontSize:11,fontWeight:700,color:"#555",textTransform:"uppercase",letterSpacing:.4,marginBottom:8}}>Which list?</div>
-        <ListPicker value={list} onChange={setList} counts={counts} />
-      </div>
-      <div style={{display:"flex",gap:8,marginBottom:20}}>
-        {["paste","manual"].map(m => (
-          <button key={m} onClick={() => setMode(m)} style={{
-            padding:"6px 16px", border:"1.5px solid #2d5a1b", borderRadius:5, fontSize:12,
-            background: mode===m ? "#2d5a1b" : "#fff",
-            color: mode===m ? "#fff" : "#2d5a1b",
-            fontWeight: mode===m ? 700 : 400
-          }}>{m==="paste" ? "📋 Paste / Upload" : "✏️ Add Manually"}</button>
-        ))}
-      </div>
-
-      {mode==="paste" && (
-        <div>
-          <div onDragOver={e=>{e.preventDefault();setDragOver(true)}}
-               onDragLeave={() => setDragOver(false)}
-               onDrop={e=>{e.preventDefault();setDragOver(false);handleFile(e.dataTransfer.files[0])}}
-               onClick={() => !loading && fileRef.current.click()}
-               style={{border:`2px dashed ${dragOver?"#2d5a1b":"#ccc"}`,borderRadius:10,padding:"20px",
-                 textAlign:"center",cursor:loading?"wait":"pointer",background:dragOver?"#f0f7eb":"#fafafa",marginBottom:12}}>
-            <div style={{fontSize:22}}>📄</div>
-            <div style={{fontSize:13,color:"#888",marginTop:4}}>
-              {loading ? "Extracting…" : "Drop .xlsx, .xls, .docx, or .txt here, or click to browse"}
-            </div>
-            <input ref={fileRef} type="file" accept=".xlsx,.xls,.docx,.txt" style={{display:"none"}}
-              onChange={e => handleFile(e.target.files[0])} />
-          </div>
-          <textarea value={pasteText} onChange={e => setPaste(e.target.value)}
-            placeholder="Or paste job list text here…"
-            style={{width:"100%",height:160,padding:10,border:"1px solid #bbb",borderRadius:6,
-              fontSize:12,fontFamily:"monospace",resize:"vertical"}} />
-          <div style={{display:"flex",gap:10,marginTop:8}}>
-            <button onClick={doParse} disabled={!pasteText.trim()} style={{
-              padding:"8px 20px",background:"#2d5a1b",color:"#fff",border:"none",
-              borderRadius:6,fontSize:13,fontWeight:600,opacity:pasteText.trim()?1:.5
-            }}>Parse & Save</button>
-            <button onClick={() => setPaste("")} style={{
-              padding:"8px 14px",background:"#fff",color:"#c0392b",
-              border:"1.5px solid #c0392b",borderRadius:6,fontSize:13
-            }}>Clear</button>
-          </div>
-        </div>
-      )}
-
-      {mode==="manual" && (
-        <div style={{border:"1px solid #ddd",borderRadius:8,padding:16,background:"#fafafa"}}>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0 16px"}}>
-            {[["name","Name *"],["address","Address"],["code","Code"],["miles","Miles"],["linearFeet","Linear Feet"],["acreage","Acreage"]].map(([k,l]) => (
-              <div key={k} style={{marginBottom:10}}>
-                <label style={{fontSize:11,fontWeight:700,color:"#555",textTransform:"uppercase",letterSpacing:.4,display:"block",marginBottom:3}}>{l}</label>
-                <input value={draft[k]} onChange={e => setDraft(d => ({...d,[k]:e.target.value}))}
-                  style={{width:"100%",padding:"7px 10px",border:"1px solid #bbb",borderRadius:5,fontSize:13}} />
-              </div>
-            ))}
-          </div>
-          <button onClick={doAdd} style={{padding:"8px 20px",background:"#2d5a1b",color:"#fff",border:"none",borderRadius:6,fontSize:13,fontWeight:600}}>+ Add Job</button>
-        </div>
-      )}
-
-      {status && <p style={{fontSize:13,margin:"12px 0 0",color:status.startsWith("✅")?"#2d5a1b":status.startsWith("⚠️")?"#e67e22":"#c0392b"}}>{status}</p>}
-
-      <h4 style={{color:"#2d5a1b",margin:"20px 0 10px",fontSize:13}}>Stored Lists</h4>
-      {LISTS.map(l => {
-        const jobs = jobLists[l]||[];
-        return (
-          <div key={l} style={{marginBottom:8,border:"1px solid #ddd",borderRadius:7,overflow:"hidden"}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",background:"#e8f0e2"}}>
-              <span style={{fontWeight:700,fontSize:13,color:"#2d5a1b"}}>{l}</span>
-              <div style={{display:"flex",gap:8,alignItems:"center"}}>
-                <span style={{fontSize:12,color:"#555"}}>{jobs.length} jobs</span>
-                {jobs.length>0 && (
-                  <button onClick={() => { if(confirm(`Clear "${l}"?`)) setJobLists({...jobLists,[l]:[]});}}
-                    style={{fontSize:11,color:"#c0392b",background:"none",border:"1px solid #e0c0c0",borderRadius:4,padding:"2px 7px"}}>Clear</button>
-                )}
-              </div>
-            </div>
-            {jobs.length>0 && (
-              <div style={{maxHeight:120,overflowY:"auto"}}>
-                <table style={{width:"100%",borderCollapse:"collapse",fontSize:11}}>
-                  <tbody>
-                    {jobs.map((j,i) => (
-                      <tr key={i} style={{background:i%2===0?"#fff":"#f9fbf7",borderBottom:"1px solid #f0f0f0"}}>
-                        <td style={{padding:"4px 10px",color:"#aaa",width:24}}>{i+1}</td>
-                        <td style={{padding:"4px 8px",fontWeight:600}}>{j.name}</td>
-                        <td style={{padding:"4px 8px",color:"#666"}}>{j.address}</td>
-                        <td style={{padding:"4px 8px",color:"#999",whiteSpace:"nowrap"}}>{j.miles?`${j.miles} mi`:j.acreage?`${j.acreage} ac`:""}</td>
-                        <td style={{padding:"4px 8px",textAlign:"right"}}>
-                          <button onClick={() => {
-                            const updated = (jobLists[l]||[]).filter((_,idx) => idx!==i);
-                            setJobLists({...jobLists,[l]:updated});
-                          }} style={{fontSize:10,color:"#c0392b",background:"none",border:"none",padding:"0 4px"}}>✕</button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
 
 // ── Jobs Tab ──────────────────────────────────────────────────────────────────
 const EMPTY_PENDING = Object.fromEntries(LISTS.map(l => [l, []]));
@@ -635,7 +461,7 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs }) {
         <div style={{padding:40,textAlign:"center",color:"#aaa",border:"2px dashed #ddd",borderRadius:10}}>
           <div style={{fontSize:32,marginBottom:8}}>📋</div>
           <div style={{fontWeight:600,marginBottom:4}}>No jobs in {listName}</div>
-          <div style={{fontSize:12}}>Go to Upload to add your job list</div>
+          <div style={{fontSize:12}}>No jobs loaded for this list</div>
         </div>
       ) : (
         <div style={{display:"grid",gridTemplateColumns:panel?"1fr 340px":"1fr",gap:16,alignItems:"start"}}>
@@ -850,7 +676,7 @@ function ChemTab({ chemDefaults, setChemDefaults }) {
 function App() {
   const [tab, setTab]                     = useState("Jobs");
   const [ready, setReady]                 = useState(false);
-  const [jobLists, setJobLists]           = useLS("spraylog_jobs",  {[LISTS[0]]:[],[LISTS[1]]:[],[LISTS[2]]:[],[LISTS[3]]:[]}, "/api/job-lists");
+  const [jobLists, setJobLists]           = useLS("spraylog_jobs",  {"TAC 100":TAC_100_JOBS,[LISTS[1]]:[],[LISTS[2]]:[],[LISTS[3]]:[]}, "/api/job-lists");
   const [chemDefaults, setChemDefaults]   = useLS("spraylog_chem",  DEFAULT_CHEM, "/api/chem-defaults");
   const [completedLogs, setCompletedLogs] = useLS("spraylog_logs",  [], "/api/logs");
   const totalJobs = Object.values(jobLists).flat().length;
@@ -858,9 +684,12 @@ function App() {
   useEffect(() => {
     api.get('/api/all').then(data => {
       if (data) {
-        if (data.jobLists     && Object.keys(data.jobLists).length)     setJobLists(data.jobLists);
         if (data.chemDefaults && Object.keys(data.chemDefaults).length) setChemDefaults(data.chemDefaults);
         if (data.logs?.length)                                          setCompletedLogs(data.logs);
+        // Always use hard-coded TAC 100; merge other lists from server
+        if (data.jobLists) {
+          setJobLists(prev => ({ ...data.jobLists, "TAC 100": TAC_100_JOBS }));
+        }
       }
       setReady(true);
     });
@@ -886,10 +715,9 @@ function App() {
         </div>
       </div>
       <div style={{maxWidth:980,margin:"24px auto",padding:"0 16px"}}>
-        <Tabs tabs={["Jobs","Upload","Saved Logs","Chemicals"]} active={tab} onChange={setTab} />
+        <Tabs tabs={["Jobs","Saved Logs","Chemicals"]} active={tab} onChange={setTab} />
         <div style={{background:"#fff",borderRadius:10,padding:26,boxShadow:"0 2px 12px rgba(0,0,0,.07)"}}>
           {tab==="Jobs"       && <JobsTab jobLists={jobLists} chemDefaults={chemDefaults} completedLogs={completedLogs} setCompletedLogs={setCompletedLogs} />}
-          {tab==="Upload"     && <UploadTab jobLists={jobLists} setJobLists={setJobLists} />}
           {tab==="Saved Logs" && <LogsTab completedLogs={completedLogs} setCompletedLogs={setCompletedLogs} />}
           {tab==="Chemicals"  && <ChemTab chemDefaults={chemDefaults} setChemDefaults={setChemDefaults} />}
         </div>
