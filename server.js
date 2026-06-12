@@ -3,7 +3,8 @@ const Database = require('better-sqlite3');
 const path = require('path');
 
 const app = express();
-const db = new Database(path.join(__dirname, 'spraylog.db'));
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'spraylog.db');
+const db = new Database(DB_PATH);
 
 app.use(express.json({ limit: '2mb' }));
 app.use(express.static(__dirname));
