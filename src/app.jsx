@@ -793,8 +793,17 @@ function WeatherBox({ weather }) {
 // ── Jobs Tab ──────────────────────────────────────────────────────────────────
 const EMPTY_PENDING = Object.fromEntries(LISTS.map(l => [l, []]));
 
+const BIG_SPRAY_SUBS = [
+  { key:"ALL", label:"All",               prefix:null },
+  { key:"AL",  label:"Acquisition Lots",  prefix:"AL" },
+  { key:"DB",  label:"Detention Ponds",   prefix:"DB" },
+  { key:"EC",  label:"Earthen Channels",  prefix:"EC" },
+  { key:"LC",  label:"Lined Channels",    prefix:"LC" },
+];
+
 function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs }) {
   const [listName, setListName]     = useState(LISTS[0]);
+  const [bigSub, setBigSub]         = useState("ALL");
   const [search, setSearch]         = useState("");
   const [panel, setPanel]           = useState(null);
   // Single object keyed by list name — fixes stale-pending bug when switching lists
@@ -815,7 +824,11 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs }) {
     });
   }, [listName, setAllPending]);
 
-  const jobs     = jobLists[listName]||[];
+  const isBigSpray = listName === "TAC 295 Big Spray";
+  const allJobs  = jobLists[listName]||[];
+  const jobs     = isBigSpray && bigSub !== "ALL"
+    ? allJobs.filter(j => j.code?.startsWith(BIG_SPRAY_SUBS.find(s=>s.key===bigSub)?.prefix||""))
+    : allJobs;
   const isTAC100 = listName==="TAC 100";
 
   // Build a set of job names already committed to a saved log for this list
@@ -903,9 +916,21 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs }) {
 
   return (
     <div>
-      <div style={{marginBottom:16}}>
-        <ListPicker value={listName} onChange={l => { setListName(l); setPanel(null); setSearch(""); }} counts={counts} />
+      <div style={{marginBottom:isBigSpray?8:16}}>
+        <ListPicker value={listName} onChange={l => { setListName(l); setBigSub("ALL"); setPanel(null); setSearch(""); }} counts={counts} />
       </div>
+      {isBigSpray && (
+        <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:16}}>
+          {BIG_SPRAY_SUBS.map(s => (
+            <button key={s.key} onClick={() => { setBigSub(s.key); setPanel(null); setSearch(""); }} style={{
+              padding:"4px 12px", border:"1.5px solid #5a8a3a", borderRadius:5, fontSize:11,
+              background: bigSub===s.key ? "#5a8a3a" : "#f0f7eb",
+              color: bigSub===s.key ? "#fff" : "#2d5a1b",
+              fontWeight: bigSub===s.key ? 700 : 400,
+            }}>{s.label}</button>
+          ))}
+        </div>
+      )}
 
       {pending.length > 0 && (
         <div style={{background:"#e8f0e2",border:"1px solid #b5d4a0",borderRadius:8,padding:"10px 14px",marginBottom:16}}>
