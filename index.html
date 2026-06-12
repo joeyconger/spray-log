@@ -18,9 +18,16 @@
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const { useState, useRef } = React;
+const { useState, useRef, useEffect } = React;
 
 const LISTS = ["TAC 100", "TAC 295 Big Spray", "TAC 295 Small Spray", "Trails"];
+
+// ── API sync helpers ──────────────────────────────────────────────────────────
+const api = {
+  get:  (path)      => fetch(path).then(r => r.ok ? r.json() : null).catch(() => null),
+  put:  (path, body) => fetch(path, { method:"PUT",  headers:{"Content-Type":"application/json"}, body:JSON.stringify(body) }).catch(()=>{}),
+};
+
 
 const DEFAULT_CHEM = {
   "TAC 100":             { pesticide:"Glyphosate", tradeName:"Round Up Custom", manufacturer:"Monsanto", tankConc:"1%", epaReg:"524-343", epaEst:"524-IA-1", applicatorType:"Recirculating Sprayer", ratePerAcre:"12 oz per acre", gallonsMixture:"", amountApplied:"", rateCarrier:"" },
@@ -30,11 +37,15 @@ const DEFAULT_CHEM = {
 };
 
 // ── Storage ───────────────────────────────────────────────────────────────────
-function useLS(key, init) {
+function useLS(key, init, apiPath) {
   const [val, setVal] = useState(() => {
     try { const s = localStorage.getItem(key); return s ? JSON.parse(s) : init; } catch { return init; }
   });
-  const set = v => { setVal(v); try { localStorage.setItem(key, JSON.stringify(v)); } catch {} };
+  const set = v => {
+    setVal(v);
+    try { localStorage.setItem(key, JSON.stringify(v)); } catch {}
+    if (apiPath) api.put(apiPath, v);
+  };
   return [val, set];
 }
 
@@ -399,7 +410,7 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs }) {
   const [listName, setListName]   = useState(LISTS[0]);
   const [search, setSearch]       = useState("");
   const [panel, setPanel]         = useState(null);
-  const [pending, setPending]     = useLS("spraylog_pending_"+listName, []);
+  const [pending, setPending]     = useLS("spraylog_pending_"+listName, [], "/api/pending/"+encodeURIComponent(listName));
   const [showLabel, setShowLabel] = useState(false);
   const [batchLabel, setBatchLabel] = useState("");
   const [lastDate, setLastDate]   = useState(() => localStorage.getItem("spraylog_lastDate") || new Date().toISOString().slice(0,10));
@@ -756,10 +767,29 @@ function ChemTab({ chemDefaults, setChemDefaults }) {
 // ── App ───────────────────────────────────────────────────────────────────────
 function App() {
   const [tab, setTab]                     = useState("Jobs");
-  const [jobLists, setJobLists]           = useLS("spraylog_jobs", {[LISTS[0]]:[],[LISTS[1]]:[],[LISTS[2]]:[],[LISTS[3]]:[]});
-  const [chemDefaults, setChemDefaults]   = useLS("spraylog_chem", DEFAULT_CHEM);
-  const [completedLogs, setCompletedLogs] = useLS("spraylog_logs", []);
+  const [ready, setReady]                 = useState(false);
+  const [jobLists, setJobLists]           = useLS("spraylog_jobs",  {[LISTS[0]]:[],[LISTS[1]]:[],[LISTS[2]]:[],[LISTS[3]]:[]}, "/api/job-lists");
+  const [chemDefaults, setChemDefaults]   = useLS("spraylog_chem",  DEFAULT_CHEM, "/api/chem-defaults");
+  const [completedLogs, setCompletedLogs] = useLS("spraylog_logs",  [], "/api/logs");
   const totalJobs = Object.values(jobLists).flat().length;
+
+  // On mount, pull server state (server is authoritative over localStorage)
+  useEffect(() => {
+    api.get('/api/all').then(data => {
+      if (!data) { setReady(true); return; }
+      if (data.jobLists     && Object.keys(data.jobLists).length)     setJobLists(data.jobLists);
+      if (data.chemDefaults && Object.keys(data.chemDefaults).length) setChemDefaults(data.chemDefaults);
+      if (data.logs         && data.logs.length)                      setCompletedLogs(data.logs);
+      // Pending is loaded per-list inside JobsTab
+      setReady(true);
+    });
+  }, []);
+
+  if (!ready) return (
+    <div style={{minHeight:"100vh",background:"#f2f5ee",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Georgia,serif",color:"#2d5a1b",fontSize:15}}>
+      Loading…
+    </div>
+  );
 
   return (
     <div style={{minHeight:"100vh",background:"#f2f5ee",fontFamily:"Georgia,serif"}}>
