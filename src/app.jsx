@@ -801,13 +801,11 @@ const BIG_SPRAY_SUBS = [
   { key:"LC",  label:"Lined Channels",    prefix:"LC" },
 ];
 
-function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs }) {
+function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs, allPending, setAllPending }) {
   const [listName, setListName]     = useState(LISTS[0]);
   const [bigSub, setBigSub]         = useState("ALL");
   const [search, setSearch]         = useState("");
   const [panel, setPanel]           = useState(null);
-  // Single object keyed by list name — fixes stale-pending bug when switching lists
-  const [allPending, setAllPending] = useLS("spraylog_pending2", EMPTY_PENDING);
   const [showLabel, setShowLabel]   = useState(false);
   const [batchLabel, setBatchLabel] = useState("");
   const [lastDate, setLastDate]     = useState(
@@ -1198,6 +1196,7 @@ function App() {
   const [jobLists, setJobLists]           = useLS("spraylog_jobs",  {"TAC 100":TAC_100_JOBS,"TAC 295 Big Spray":[...TAC_295_BIG_ACQUISITION_LOTS,...TAC_295_BIG_DETENTION_PONDS,...TAC_295_BIG_EARTHEN_CHANNELS,...TAC_295_BIG_LINED_CHANNELS],"TAC 295 Small Spray":TAC_295_SMALL_JOBS,"Trails":TRAILS_JOBS}, "/api/job-lists");
   const [chemDefaults, setChemDefaults]   = useLS("spraylog_chem",  DEFAULT_CHEM, "/api/chem-defaults");
   const [completedLogs, setCompletedLogs] = useLS("spraylog_logs",  [], "/api/logs");
+  const [allPending, setAllPending]       = useLS("spraylog_pending2", EMPTY_PENDING);
   const totalJobs = Object.values(jobLists).flat().length;
 
   useEffect(() => {
@@ -1208,6 +1207,15 @@ function App() {
         // Always use hard-coded TAC 100; merge other lists from server
         if (data.jobLists) {
           setJobLists(prev => ({ ...data.jobLists, "TAC 100": TAC_100_JOBS, "TAC 295 Big Spray": [...TAC_295_BIG_ACQUISITION_LOTS, ...TAC_295_BIG_DETENTION_PONDS, ...TAC_295_BIG_EARTHEN_CHANNELS, ...TAC_295_BIG_LINED_CHANNELS], "TAC 295 Small Spray": TAC_295_SMALL_JOBS, "Trails": TRAILS_JOBS }));
+        }
+        // Restore pending from server if localStorage is empty
+        if (data.pending) {
+          const lsEmpty = !localStorage.getItem("spraylog_pending2") ||
+            Object.values(JSON.parse(localStorage.getItem("spraylog_pending2")||"{}")).every(a => !a?.length);
+          if (lsEmpty) {
+            const hasPending = Object.values(data.pending).some(a => a?.length);
+            if (hasPending) setAllPending(data.pending);
+          }
         }
       }
       setReady(true);
@@ -1236,7 +1244,7 @@ function App() {
       <div style={{maxWidth:980,margin:"24px auto",padding:"0 16px"}}>
         <Tabs tabs={["Jobs","Saved Logs","Chemicals"]} active={tab} onChange={setTab} />
         <div style={{background:"#fff",borderRadius:10,padding:26,boxShadow:"0 2px 12px rgba(0,0,0,.07)"}}>
-          {tab==="Jobs"       && <JobsTab jobLists={jobLists} chemDefaults={chemDefaults} completedLogs={completedLogs} setCompletedLogs={setCompletedLogs} />}
+          {tab==="Jobs"       && <JobsTab jobLists={jobLists} chemDefaults={chemDefaults} completedLogs={completedLogs} setCompletedLogs={setCompletedLogs} allPending={allPending} setAllPending={setAllPending} />}
           {tab==="Saved Logs" && <LogsTab completedLogs={completedLogs} setCompletedLogs={setCompletedLogs} />}
           {tab==="Chemicals"  && <ChemTab chemDefaults={chemDefaults} setChemDefaults={setChemDefaults} />}
         </div>
