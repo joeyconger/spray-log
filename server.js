@@ -8,7 +8,7 @@ const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DATA_FILE = path.join(__dirname, 'data.json');
+const DATA_FILE = fs.existsSync('/data') ? '/data/data.json' : path.join(__dirname, 'data.json');
 console.log('PORT:', PORT);
 console.log('DATA_FILE:', DATA_FILE);
 console.log('__dirname:', __dirname);
