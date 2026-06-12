@@ -226,6 +226,45 @@ const TAC_295_BIG_DETENTION_PONDS = [
   {code:"DB3121",name:"METRO PARK",address:"6100 S 118 E AVE",miles:"",linearFeet:"",acreage:"2.88"},
 ];
 
+const TAC_295_BIG_EARTHEN_CHANNELS = [
+  {code:"EC4001",name:"BROOKHOLLOW CREEK",address:"3100 S 101 E AVE",miles:"",linearFeet:"3400",acreage:"13.81"},
+  {code:"EC4002",name:"BROOKHOLLOW CREEK",address:"3100 S 108 E AVE",miles:"",linearFeet:"2400",acreage:"4.9"},
+  {code:"EC4004",name:"CATFISH CREEK (55TH PL & 169)",address:"5500 S 109 E AVE",miles:"",linearFeet:"1235",acreage:"2.25"},
+  {code:"EC4005",name:"CHERRY CREEK",address:"3700 S QUANAH AVE",miles:"",linearFeet:"3890",acreage:"13.39"},
+  {code:"EC4006",name:"CHERRY CREEK",address:"4800 S ELWOOD AVE",miles:"",linearFeet:"660",acreage:"3.6"},
+  {code:"EC4007",name:"COAL CREEK",address:"2100 N DARLINGTON AVE",miles:"",linearFeet:"1615",acreage:"2.4"},
+  {code:"EC4008",name:"COOLEY CREEK",address:"10755 E ADMIRAL PL",miles:"",linearFeet:"1285",acreage:"1.5"},
+  {code:"EC4009",name:"FLAT ROCK CREEK TRIBUTARY",address:"3429 N BIRMINGHAM AVE",miles:"",linearFeet:"1274",acreage:"1.02"},
+  {code:"EC4010",name:"FLAT ROCK CREEK",address:"4300 N CINCINNATI AVE",miles:"",linearFeet:"7513",acreage:"20"},
+  {code:"EC4012",name:"FLAT ROCK CREEK TRIBUTARY",address:"3200 E 32 ST N",miles:"",linearFeet:"661",acreage:"1.9"},
+  {code:"EC4013",name:"FRED CREEK",address:"8000 S WHEELING AVE",miles:"",linearFeet:"877",acreage:"0.8"},
+  {code:"EC4015",name:"FRED CREEK (SOUTHWOOD)",address:"8100 S EVANSTON AVE",miles:"",linearFeet:"400",acreage:"0.18"},
+  {code:"EC4017",name:"HAIKEY CREEK, WEST BRANCH",address:"7600 S MINGO RD",miles:"",linearFeet:"680",acreage:"0.75"},
+  {code:"EC4019",name:"JOE CREEK",address:"7800 S TRENTON",miles:"",linearFeet:"4800",acreage:"1.3"},
+  {code:"EC4023",name:"LITTLE HAIKEY CREEK",address:"9100 S 89 E AVE",miles:"",linearFeet:"350",acreage:"0.25"},
+  {code:"EC4027",name:"MILL CREEK (PIPEYARD OUTFALL)",address:"6100 E 13 ST",miles:"",linearFeet:"200",acreage:"0.11"},
+  {code:"EC4028",name:"MINGO CREEK",address:"10600 E 36 ST N",miles:"",linearFeet:"2680",acreage:"6"},
+  {code:"EC4029",name:"MINGO CREEK (RR TO I-244)",address:"10200 E PINE ST",miles:"",linearFeet:"7090",acreage:"26.85"},
+  {code:"EC4030",name:"MINGO CREEK (I-244 TO 11TH)",address:"200 S MINGO RD",miles:"",linearFeet:"6420",acreage:"36.84"},
+  {code:"EC4031",name:"MINGO CREEK (11TH TO LINER)",address:"5960 S 97 E AVE",miles:"",linearFeet:"5960",acreage:"32.83"},
+  {code:"EC4032",name:"MINGO CREEK (LINER TO HICKS)",address:"2000 S 93 E AVE",miles:"",linearFeet:"4350",acreage:"17.97"},
+  {code:"EC4033",name:"MINGO CREEK (HICKS TO 41ST)",address:"3100 S 103 E AVE",miles:"",linearFeet:"6180",acreage:"19.86"},
+  {code:"EC4034",name:"MINGO CREEK (41ST TO B.A.)",address:"4100 S 103 E AVE",miles:"",linearFeet:"1700",acreage:"5"},
+  {code:"EC4035",name:"MINGO CREEK (B.A. TO 51ST)",address:"5100 S 108 E AVE",miles:"",linearFeet:"2160",acreage:"6.54"},
+  {code:"EC4036",name:"MINGO CREEK",address:"5800 S MINGO RD",miles:"",linearFeet:"4100",acreage:"9.6"},
+  {code:"EC4037",name:"MINGO CREEK",address:"6800 S MEMORIAL DR",miles:"",linearFeet:"700",acreage:"0.9"},
+  {code:"EC4040",name:"SPUNKY CREEK TRIB, B",address:"16300 E ADMIRAL PL",miles:"",linearFeet:"",acreage:"0.08"},
+  {code:"EC4041",name:"SUGAR CREEK (Mingo Cr to Garnett)",address:"10900 E 39 PL",miles:"",linearFeet:"4700",acreage:"14"},
+  {code:"EC4042",name:"VALLEY VIEW (Flatrock to 4900 N)",address:"4800 N IROQUOIS AVE",miles:"",linearFeet:"4300",acreage:"10.85"},
+  {code:"EC4043",name:"VALLEY VIEW (NORTH of 56 St N)",address:"5600 N ELGIN AVE",miles:"",linearFeet:"3800",acreage:"6"},
+  {code:"EC4044",name:"VALLEY VIEW TRIBUTARY",address:"5000 N CINCINNATI AVE",miles:"",linearFeet:"640",acreage:"0.36"},
+  {code:"EC4045",name:"VENSEL CREEK",address:"9900 S FLORENCE AVE",miles:"",linearFeet:"3440",acreage:"20.13"},
+  {code:"EC4048",name:"SKELLY DRIVE DITCH",address:"6535 E SKELLY DRIVE",miles:"",linearFeet:"326",acreage:"0.19"},
+  {code:"EC4049",name:"DIRTY BUTTER TRIBUTARY",address:"3500 N COLUMBIA AVE",miles:"",linearFeet:"",acreage:"0.83"},
+  {code:"EC4050",name:"EAGLE CREEK",address:"11501 E PINE ST",miles:"",linearFeet:"",acreage:"1.84"},
+  {code:"EC4055",name:"FORD CREEK",address:"11302 E. 51st ST. S",miles:"",linearFeet:"",acreage:"10"},
+];
+
 const TAC_100_JOBS = [
   {code:"1",name:"1700 S. 119th E. Ave",address:"",miles:"",linearFeet:"",acreage:"4.1"},
   {code:"2",name:"3100 S. 101st E. Ave",address:"",miles:"",linearFeet:"",acreage:"8.67"},
@@ -899,7 +938,7 @@ function ChemTab({ chemDefaults, setChemDefaults }) {
 function App() {
   const [tab, setTab]                     = useState("Jobs");
   const [ready, setReady]                 = useState(false);
-  const [jobLists, setJobLists]           = useLS("spraylog_jobs",  {"TAC 100":TAC_100_JOBS,"TAC 295 Big Spray":[...TAC_295_BIG_ACQUISITION_LOTS,...TAC_295_BIG_DETENTION_PONDS],[LISTS[2]]:[],[LISTS[3]]:[]}, "/api/job-lists");
+  const [jobLists, setJobLists]           = useLS("spraylog_jobs",  {"TAC 100":TAC_100_JOBS,"TAC 295 Big Spray":[...TAC_295_BIG_ACQUISITION_LOTS,...TAC_295_BIG_DETENTION_PONDS,...TAC_295_BIG_EARTHEN_CHANNELS],[LISTS[2]]:[],[LISTS[3]]:[]}, "/api/job-lists");
   const [chemDefaults, setChemDefaults]   = useLS("spraylog_chem",  DEFAULT_CHEM, "/api/chem-defaults");
   const [completedLogs, setCompletedLogs] = useLS("spraylog_logs",  [], "/api/logs");
   const totalJobs = Object.values(jobLists).flat().length;
@@ -911,7 +950,7 @@ function App() {
         if (data.logs?.length)                                          setCompletedLogs(data.logs);
         // Always use hard-coded TAC 100; merge other lists from server
         if (data.jobLists) {
-          setJobLists(prev => ({ ...data.jobLists, "TAC 100": TAC_100_JOBS, "TAC 295 Big Spray": [...TAC_295_BIG_ACQUISITION_LOTS, ...TAC_295_BIG_DETENTION_PONDS] }));
+          setJobLists(prev => ({ ...data.jobLists, "TAC 100": TAC_100_JOBS, "TAC 295 Big Spray": [...TAC_295_BIG_ACQUISITION_LOTS, ...TAC_295_BIG_DETENTION_PONDS, ...TAC_295_BIG_EARTHEN_CHANNELS] }));
         }
       }
       setReady(true);
