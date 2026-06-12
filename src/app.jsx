@@ -106,32 +106,35 @@ function parseExcel(arrayBuffer) {
   const wb = XLSX.read(arrayBuffer, { type: 'array' });
   const ws = wb.Sheets[wb.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
-  if (rows.length < 2) return [];
+  if (rows.length < 2) return { jobs: [], headers: [] };
 
-  // Map header names to job fields (case-insensitive, flexible)
   const FIELD_MAP = {
-    name: ["name","job name","site","location","site name"],
-    address: ["address","addr","street","street address"],
-    code: ["code","job code","id"],
-    miles: ["miles","mi","distance"],
+    name:       ["name","job name","site name","job","title"],
+    address:    ["address","addr","street","street address","location","site","place"],
+    code:       ["code","job code","id","job id","job #","#"],
+    miles:      ["miles","mi","distance"],
     linearFeet: ["linear feet","linear ft","linear","lin ft","lin feet","lf"],
-    acreage: ["acreage","acres","ac"],
+    acreage:    ["acreage","acres","ac"],
   };
   const headers = rows[0].map(h => String(h).trim().toLowerCase());
   const colFor = field => {
-    const aliases = FIELD_MAP[field];
-    const idx = headers.findIndex(h => aliases.includes(h));
+    const idx = headers.findIndex(h => FIELD_MAP[field].includes(h));
     return idx === -1 ? null : idx;
   };
   const cols = Object.fromEntries(Object.keys(FIELD_MAP).map(f => [f, colFor(f)]));
 
-  return rows.slice(1)
+  // If no name column found, fall back to first column
+  if (cols.name === null) cols.name = 0;
+
+  const jobs = rows.slice(1)
     .filter(row => row.some(c => String(c).trim()))
     .map(row => {
       const get = f => cols[f] !== null ? String(row[cols[f]]||"").trim() : "";
       return { name:get("name"), address:get("address"), code:get("code"), miles:get("miles"), linearFeet:get("linearFeet"), acreage:get("acreage") };
     })
     .filter(j => j.name);
+
+  return { jobs, headers };
 }
 
 function parseJobs(text) {
@@ -297,8 +300,8 @@ function UploadTab({ jobLists, setJobLists }) {
     try {
       if (ext==="xlsx" || ext==="xls") {
         const ab = await file.arrayBuffer();
-        const jobs = parseExcel(ab);
-        if (!jobs.length) { setStatus("❌ No jobs found — make sure row 1 has a 'Name' column"); setLoading(false); return; }
+        const { jobs, headers } = parseExcel(ab);
+        if (!jobs.length) { setStatus(`❌ No jobs found. Headers detected: ${headers.join(", ") || "none"}`); setLoading(false); return; }
         setJobLists({...jobLists, [list]: jobs});
         setStatus(`✅ Imported ${jobs.length} jobs from "${file.name}" to "${list}"`);
       } else if (ext==="docx") {
