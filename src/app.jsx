@@ -396,6 +396,103 @@ const TRAILS_JOBS = [
   {code:"",name:"WILDFLOWER MEADOW",address:"1031 E 33RD PL",miles:"0.10",linearFeet:"529",acreage:""},
 ];
 
+const TAC_295_SMALL_JOBS = [
+  {code:"10",name:"5100 W 1st",address:"5100 W 1st",miles:"",linearFeet:"",acreage:"7.06"},
+  {code:"12",name:"Osage",address:"1101 W Pine",miles:"",linearFeet:"",acreage:"26.3"},
+  {code:"73",name:"600 S Mingo",address:"600 S Mingo",miles:"",linearFeet:"",acreage:"9.45"},
+  {code:"75",name:"Pork Chop",address:"1200 S Mingo",miles:"",linearFeet:"",acreage:"3.1"},
+  {code:"76",name:"Redford",address:"2100 S 101st E Ave",miles:"",linearFeet:"",acreage:"13.47"},
+  {code:"98",name:"2100 S 119th E Ave",address:"2100 S 119th E Ave",miles:"",linearFeet:"",acreage:"5"},
+  {code:"101",name:"2100 S 108th E Ave",address:"2100 S 108th E Ave",miles:"",linearFeet:"",acreage:"0.75"},
+  {code:"102",name:"2400 S Garnett",address:"2400 S Garnett",miles:"",linearFeet:"",acreage:"24.56"},
+  {code:"125",name:"Park Plaza East III",address:"3700 S 130th E Ave",miles:"",linearFeet:"",acreage:"11.25"},
+  {code:"126",name:"Southern Trib",address:"4100 S 118th E Ave",miles:"",linearFeet:"",acreage:"12.14"},
+  {code:"143",name:"8100 S Yale",address:"8100 S Yale",miles:"",linearFeet:"",acreage:"2.7"},
+  {code:"145",name:"10700 E 56th St",address:"10700 E 56th St",miles:"",linearFeet:"",acreage:"4.9"},
+  {code:"150",name:"6400 S 89th E Ave",address:"6400 S 89th E Ave",miles:"",linearFeet:"",acreage:"2.66"},
+  {code:"151",name:"Woodland Hills Mall",address:"6600 S 90th E Ave",miles:"",linearFeet:"",acreage:"17.82"},
+  {code:"159",name:"Woodlands Meadow",address:"8600 E 80th Pl",miles:"",linearFeet:"",acreage:"1.83"},
+  {code:"192",name:"Pleasant Valley",address:"8100 S Joplin",miles:"",linearFeet:"",acreage:"2.41"},
+  {code:"259",name:"3200 N Birmingham",address:"3200 N Birmingham",miles:"",linearFeet:"",acreage:"1"},
+  {code:"263",name:"3200 N Columbia",address:"3200 N Columbia",miles:"",linearFeet:"",acreage:"1"},
+  {code:"1006",name:"Mingo",address:"200 S 94th E Ave",miles:"",linearFeet:"",acreage:"60"},
+  {code:"1007",name:"Audubon",address:"3000 S 86th E Ave",miles:"",linearFeet:"",acreage:"11.3"},
+  {code:"1008",name:"Coal Creek",address:"5200 E Woodrow",miles:"",linearFeet:"",acreage:"3.17"},
+  {code:"1059",name:"Lot 8 Blk 1 Lynn Lane Estates",address:"17212 E 11th",miles:"",linearFeet:"",acreage:"7.3"},
+  {code:"1060",name:"Valley View Lot",address:"531 E 51st Pl N",miles:"",linearFeet:"",acreage:"0.25"},
+  {code:"1061",name:"Lot 29 Blk 1 Bridal Trails",address:"10524 S 77th E Ave",miles:"",linearFeet:"",acreage:"1"},
+  {code:"1062",name:"Kingsbury II Reserve",address:"9200 S 71st E Ave",miles:"",linearFeet:"",acreage:"3"},
+  {code:"1063",name:"Lot 8 & 9, Magic Circle",address:"1746 & 1804 S 110th E Ave",miles:"",linearFeet:"",acreage:"0.5"},
+  {code:"1064",name:"Lot 9 Blk 3 Meadowbrook Heights",address:"405 S 129th E Ave",miles:"",linearFeet:"",acreage:"0.5"},
+  {code:"1065",name:"Dirty Butter Trail Acquisition",address:"675 E Tecumseh",miles:"",linearFeet:"",acreage:"6.61"},
+  {code:"1066",name:"Valley View Lot",address:"410 E 58th St N",miles:"",linearFeet:"",acreage:"0.25"},
+  {code:"1067",name:"Darlington Acquisition",address:"2100-2207 N Darlington Pl",miles:"",linearFeet:"",acreage:"3.9"},
+  {code:"1068",name:"Vienna Woods Drainage",address:"6929 S Knoxville Pl",miles:"",linearFeet:"",acreage:"0.25"},
+  {code:"1069",name:"5525 E Ute",address:"5525 E Ute",miles:"",linearFeet:"",acreage:"0.25"},
+  {code:"1070",name:"1225 S 141st E Ave",address:"1225 S 141st E Ave",miles:"",linearFeet:"",acreage:"0.3"},
+  {code:"1071",name:"13311 E 27th St S",address:"13311 E 27th St S",miles:"",linearFeet:"",acreage:"0.25"},
+  {code:"1072",name:"Lot 11 & 12 Hackathorn Addn",address:"423 S Trenton",miles:"",linearFeet:"",acreage:"0.32"},
+  {code:"1073",name:"Lot 14 Blk 4 Town & Country",address:"3829 E 72nd St",miles:"",linearFeet:"",acreage:"0.7"},
+  {code:"1074",name:"Crow Creek Acquisition",address:"1030 E 32nd Pl",miles:"",linearFeet:"",acreage:"0.32"},
+  {code:"1075",name:"Magic Circle",address:"1722 S 106th E Ave",miles:"",linearFeet:"",acreage:"0.25"},
+  {code:"1076",name:"Lot 2 Blk 7 Walnut Creek III",address:"3027 E 82nd St",miles:"",linearFeet:"",acreage:"2.25"},
+  {code:"1077",name:"Voluntary Flood Acquisition",address:"9550 E Latimer St",miles:"",linearFeet:"",acreage:"0.34"},
+  {code:"1078",name:"Lot 1 Blk 1 Mountain Manor 2nd",address:"2929 W 53rd St",miles:"",linearFeet:"",acreage:"0.25"},
+  {code:"1079",name:"Lot 29 Blk 15 Magic Circle",address:"1820 S 106th E Ave",miles:"",linearFeet:"",acreage:"0.25"},
+  {code:"1080",name:"Lot 24 Blk 1 Rustic Hills",address:"5817 S New Haven",miles:"",linearFeet:"",acreage:"0.25"},
+  {code:"1081",name:"Castles Acquisition",address:"3815 E 58th St",miles:"",linearFeet:"",acreage:"0.81"},
+  {code:"1082",name:"Bridal Trails Estates Acq 2",address:"10209 & 10221 S 76th E Ave",miles:"",linearFeet:"",acreage:"2.1"},
+  {code:"1083",name:"Lot 2 Blk 1 Southridge Estates 3rd",address:"7255 S Pittsburg",miles:"",linearFeet:"",acreage:"0.5"},
+  {code:"1084",name:"Lewiston Gardens Acquisition",address:"2415 E 18th St & 2412 E 17th Pl",miles:"",linearFeet:"",acreage:"0.34"},
+  {code:"1085",name:"Lot 7 Blk 7 Forest Ridge",address:"3948 S Troost Ave",miles:"",linearFeet:"",acreage:"0.73"},
+  {code:"1086",name:"4415 E 38th St",address:"4415 E 38th St",miles:"",linearFeet:"",acreage:"0.25"},
+  {code:"1087",name:"Elm Creek Acquisition",address:"1536 E 8th St",miles:"",linearFeet:"",acreage:"0.06"},
+  {code:"1088",name:"Elm Creek Acquisition",address:"1007 E 5th St",miles:"",linearFeet:"",acreage:"0.06"},
+  {code:"1089",name:"Crow Creek Acquisition",address:"3202 S Peoria Ave",miles:"",linearFeet:"",acreage:"1.83"},
+  {code:"1090",name:"Arrowhead Acquisition",address:"4508 E 39th St",miles:"",linearFeet:"",acreage:"0.17"},
+  {code:"1091",name:"BS Roberts Park",address:"1000 N Greenwood",miles:"",linearFeet:"",acreage:"9.44"},
+  {code:"1092",name:"Kirkmore Acquisition",address:"2550-2552 S Jamestown",miles:"",linearFeet:"",acreage:"0.5"},
+  {code:"1093",name:"Coal Creek Acquisition",address:"1041 N Oswego",miles:"",linearFeet:"",acreage:"0.25"},
+  {code:"1097",name:"Hammond Acquisition",address:"3812 E 58th St",miles:"",linearFeet:"",acreage:"0.65"},
+  {code:"1098",name:"Lyons Donation",address:"7800 E 83rd St",miles:"",linearFeet:"",acreage:"0.3"},
+  {code:"1100",name:"Tupelo Acquisition",address:"2127 S 125th E Ave",miles:"",linearFeet:"",acreage:"2.37"},
+  {code:"1101",name:"Lewiston Gardens Acquisition",address:"2431 E 17th Pl",miles:"",linearFeet:"",acreage:"0.25"},
+  {code:"1102",name:"Lot 17 Blk 1 Rustic Hills",address:"3916 E 59th St",miles:"",linearFeet:"",acreage:"0.25"},
+  {code:"1103",name:"Acquisition Lot",address:"2920 S Delaware Ave",miles:"",linearFeet:"",acreage:"0.25"},
+  {code:"1104",name:"Pete Rose Acquisition",address:"522 S 90th E Ave",miles:"",linearFeet:"",acreage:"0.25"},
+  {code:"1105",name:"TDA Lot",address:"1201 E 5th St",miles:"",linearFeet:"",acreage:"0.14"},
+  {code:"1106",name:"TDA Lot",address:"1020 E 5th St",miles:"",linearFeet:"",acreage:"0.16"},
+  {code:"1107",name:"TDA Lot",address:"1115 E 5th St",miles:"",linearFeet:"",acreage:"0.16"},
+  {code:"1108",name:"TDA Lot",address:"507 S Norfolk Ave",miles:"",linearFeet:"",acreage:"0.3"},
+  {code:"1109",name:"TDA Lot",address:"1645 N Greenwood Pl",miles:"",linearFeet:"",acreage:"0.57"},
+  {code:"1110",name:"TDA Lot",address:"1643 N Greenwood Ave",miles:"",linearFeet:"",acreage:"0.32"},
+  {code:"1111",name:"TDA Lot",address:"2143 N Lansing Ave",miles:"",linearFeet:"",acreage:"0.31"},
+  {code:"1112",name:"TDA Lot",address:"630 E Seminole Pl",miles:"",linearFeet:"",acreage:"0.91"},
+  {code:"1113",name:"TDA Lot",address:"557 E Seminole Pl",miles:"",linearFeet:"",acreage:"0.21"},
+  {code:"1114",name:"TDA Lot",address:"240 E Ute Pl",miles:"",linearFeet:"",acreage:"0.41"},
+  {code:"1115",name:"TDA Lot",address:"232 E Ute Pl",miles:"",linearFeet:"",acreage:"0.41"},
+  {code:"1116",name:"TDA Lot",address:"2129 N Garrison Pl",miles:"",linearFeet:"",acreage:"0.34"},
+  {code:"1117",name:"TDA Lot",address:"2148 N Garrison Pl",miles:"",linearFeet:"",acreage:"0.2"},
+  {code:"1118",name:"TDA Lot",address:"5808 N Frankfort Ave",miles:"",linearFeet:"",acreage:"0.18"},
+  {code:"1119",name:"Rockford Acquisition",address:"703 N Rockford Ave",miles:"",linearFeet:"",acreage:"0.23"},
+  {code:"1120",name:"Bridal Trails West",address:"10115 S 76th E Ave",miles:"",linearFeet:"",acreage:"0.82"},
+  {code:"1121",name:"Bridal Trails East",address:"10112 S 77th E Ave",miles:"",linearFeet:"",acreage:"0.89"},
+  {code:"1122",name:"Pearl District Acquisition",address:"702 S St Louis Ave",miles:"",linearFeet:"",acreage:"0.25"},
+  {code:"1124",name:"Dirty Butter Acquisition Lot",address:"316 E Virgin St N",miles:"",linearFeet:"",acreage:"0.27"},
+  {code:"1125",name:"Coal Acquisition",address:"3025 N Erie Ave (Gate 9319)",miles:"",linearFeet:"",acreage:"10.45"},
+  {code:"1126",name:"Haikey Acquisition Lot",address:"9300 S Mingo",miles:"",linearFeet:"",acreage:"6.1"},
+  {code:"1127",name:"Mill Creek",address:"8526 E 12th St",miles:"",linearFeet:"",acreage:"0.41"},
+  {code:"1128",name:"Fred Creek I Acquisition Lot",address:"3832 E 72nd St",miles:"",linearFeet:"",acreage:"0.44"},
+  {code:"1129",name:"Fred Creek II Acquisition Lot",address:"3714 E 72nd St",miles:"",linearFeet:"",acreage:"0.57"},
+  {code:"1130",name:"Crow Acq. Lot II, Lt 8 Blk 3",address:"2142 S Delaware Ct",miles:"",linearFeet:"",acreage:"0.23"},
+  {code:"1132",name:"Walnut Creek A",address:"8201 S Gary Ave",miles:"",linearFeet:"",acreage:"0.3"},
+  {code:"1134",name:"1100 S 138th E Ave",address:"1100 S 138th E Ave",miles:"",linearFeet:"",acreage:"1.5"},
+  {code:"1135",name:"708 S Trenton",address:"708 S Trenton",miles:"",linearFeet:"",acreage:"0.25"},
+  {code:"1136",name:"710 S Trenton",address:"710 S Trenton",miles:"",linearFeet:"",acreage:"0.25"},
+  {code:"1149",name:"2620 E 22nd St",address:"2620 E 22nd St",miles:"",linearFeet:"",acreage:"0.25"},
+  {code:"1150",name:"3908 S Evanston",address:"3908 S Evanston",miles:"",linearFeet:"",acreage:"0.25"},
+];
+
 const TAC_100_JOBS = [
   {code:"1",name:"1700 S. 119th E. Ave",address:"",miles:"",linearFeet:"",acreage:"4.1"},
   {code:"2",name:"3100 S. 101st E. Ave",address:"",miles:"",linearFeet:"",acreage:"8.67"},
@@ -1069,7 +1166,7 @@ function ChemTab({ chemDefaults, setChemDefaults }) {
 function App() {
   const [tab, setTab]                     = useState("Jobs");
   const [ready, setReady]                 = useState(false);
-  const [jobLists, setJobLists]           = useLS("spraylog_jobs",  {"TAC 100":TAC_100_JOBS,"TAC 295 Big Spray":[...TAC_295_BIG_ACQUISITION_LOTS,...TAC_295_BIG_DETENTION_PONDS,...TAC_295_BIG_EARTHEN_CHANNELS,...TAC_295_BIG_LINED_CHANNELS],[LISTS[2]]:[],"Trails":TRAILS_JOBS}, "/api/job-lists");
+  const [jobLists, setJobLists]           = useLS("spraylog_jobs",  {"TAC 100":TAC_100_JOBS,"TAC 295 Big Spray":[...TAC_295_BIG_ACQUISITION_LOTS,...TAC_295_BIG_DETENTION_PONDS,...TAC_295_BIG_EARTHEN_CHANNELS,...TAC_295_BIG_LINED_CHANNELS],"TAC 295 Small Spray":TAC_295_SMALL_JOBS,"Trails":TRAILS_JOBS}, "/api/job-lists");
   const [chemDefaults, setChemDefaults]   = useLS("spraylog_chem",  DEFAULT_CHEM, "/api/chem-defaults");
   const [completedLogs, setCompletedLogs] = useLS("spraylog_logs",  [], "/api/logs");
   const totalJobs = Object.values(jobLists).flat().length;
@@ -1081,7 +1178,7 @@ function App() {
         if (data.logs?.length)                                          setCompletedLogs(data.logs);
         // Always use hard-coded TAC 100; merge other lists from server
         if (data.jobLists) {
-          setJobLists(prev => ({ ...data.jobLists, "TAC 100": TAC_100_JOBS, "TAC 295 Big Spray": [...TAC_295_BIG_ACQUISITION_LOTS, ...TAC_295_BIG_DETENTION_PONDS, ...TAC_295_BIG_EARTHEN_CHANNELS, ...TAC_295_BIG_LINED_CHANNELS], "Trails": TRAILS_JOBS }));
+          setJobLists(prev => ({ ...data.jobLists, "TAC 100": TAC_100_JOBS, "TAC 295 Big Spray": [...TAC_295_BIG_ACQUISITION_LOTS, ...TAC_295_BIG_DETENTION_PONDS, ...TAC_295_BIG_EARTHEN_CHANNELS, ...TAC_295_BIG_LINED_CHANNELS], "TAC 295 Small Spray": TAC_295_SMALL_JOBS, "Trails": TRAILS_JOBS }));
         }
       }
       setReady(true);
