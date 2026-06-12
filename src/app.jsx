@@ -670,13 +670,51 @@ async function getWeather(lat, lon, dateStr, timeStr) {
 
 // ── Print builders ────────────────────────────────────────────────────────────
 function trailsHTML(entries, listName) {
-  const rows = entries.map(({job,weather}) => `<tr>
-    <td>${job.date||""}</td><td>${job.name||""}</td><td>${job.address||""}</td>
-    <td>${job.miles||""}</td><td>${job.linearFeet||""}</td>
-    <td>${job.timeStart||""}</td><td>${job.timeEnd||""}</td>
-    <td>${weather?.sky||""}</td><td>${weather?.temp!=null?weather.temp:""}</td>
-    <td>${weather?.wind!=null?weather.wind:""}</td><td>${weather?.windDir||""}</td>
-  </tr>`).join("");
+  const isTAC100    = listName === "TAC 100";
+  const isBig       = listName === "TAC 295 Big Spray";
+  const isSmall     = listName === "TAC 295 Small Spray";
+  const isTrails    = listName === "Trails";
+
+  let headers, rowFn;
+  if (isTAC100) {
+    headers = `<th>DATE</th><th>NAME / LOCATION</th><th>ACRES</th><th>START</th><th>END</th><th>SKY</th><th>TEMP °F</th><th>WIND</th><th>DIR</th>`;
+    rowFn = ({job,weather}) => `<tr>
+      <td>${job.date||""}</td><td>${job.name||""}</td><td>${job.acreage||""}</td>
+      <td>${job.timeStart||""}</td><td>${job.timeEnd||""}</td>
+      <td>${weather?.sky||""}</td><td>${weather?.temp!=null?weather.temp:""}</td>
+      <td>${weather?.wind!=null?weather.wind:""}</td><td>${weather?.windDir||""}</td>
+    </tr>`;
+  } else if (isBig) {
+    headers = `<th>DATE</th><th>CODE</th><th>NAME</th><th>ADDRESS</th><th>LINEAR FT</th><th>ACRES</th><th>START</th><th>END</th><th>SKY</th><th>TEMP °F</th><th>WIND</th><th>DIR</th>`;
+    rowFn = ({job,weather}) => `<tr>
+      <td>${job.date||""}</td><td>${job.code||""}</td><td>${job.name||""}</td><td>${job.address||""}</td>
+      <td>${job.linearFeet||""}</td><td>${job.acreage||""}</td>
+      <td>${job.timeStart||""}</td><td>${job.timeEnd||""}</td>
+      <td>${weather?.sky||""}</td><td>${weather?.temp!=null?weather.temp:""}</td>
+      <td>${weather?.wind!=null?weather.wind:""}</td><td>${weather?.windDir||""}</td>
+    </tr>`;
+  } else if (isSmall) {
+    headers = `<th>DATE</th><th>CODE</th><th>NAME</th><th>ADDRESS</th><th>ACRES</th><th>START</th><th>END</th><th>SKY</th><th>TEMP °F</th><th>WIND</th><th>DIR</th>`;
+    rowFn = ({job,weather}) => `<tr>
+      <td>${job.date||""}</td><td>${job.code||""}</td><td>${job.name||""}</td><td>${job.address||""}</td>
+      <td>${job.acreage||""}</td>
+      <td>${job.timeStart||""}</td><td>${job.timeEnd||""}</td>
+      <td>${weather?.sky||""}</td><td>${weather?.temp!=null?weather.temp:""}</td>
+      <td>${weather?.wind!=null?weather.wind:""}</td><td>${weather?.windDir||""}</td>
+    </tr>`;
+  } else {
+    // Trails
+    headers = `<th>DATE</th><th>NAME</th><th>ADDRESS</th><th>MILES</th><th>LINEAR FT</th><th>START</th><th>END</th><th>SKY</th><th>TEMP °F</th><th>WIND</th><th>DIR</th>`;
+    rowFn = ({job,weather}) => `<tr>
+      <td>${job.date||""}</td><td>${job.name||""}</td><td>${job.address||""}</td>
+      <td>${job.miles||""}</td><td>${job.linearFeet||""}</td>
+      <td>${job.timeStart||""}</td><td>${job.timeEnd||""}</td>
+      <td>${weather?.sky||""}</td><td>${weather?.temp!=null?weather.temp:""}</td>
+      <td>${weather?.wind!=null?weather.wind:""}</td><td>${weather?.windDir||""}</td>
+    </tr>`;
+  }
+
+  const rows = entries.map(rowFn).join("");
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
     body{font-family:Arial,sans-serif;font-size:10px;margin:16px;color:#000}
     h2{text-align:center;font-size:13px;margin-bottom:3px}
@@ -688,10 +726,7 @@ function trailsHTML(entries, listName) {
   </style></head><body>
   <h2>Maintenance Log</h2>
   <h3>City of Tulsa / Stormwater Maintenance Division — ${listName}</h3>
-  <table><thead><tr>
-    <th>DATE</th><th>NAME</th><th>ADDRESS</th><th>MILES</th><th>LINEAR FT</th>
-    <th>START</th><th>END</th><th>SKY</th><th>TEMP °F</th><th>WIND</th><th>DIR</th>
-  </tr></thead><tbody>${rows}</tbody></table>
+  <table><thead><tr>${headers}</tr></thead><tbody>${rows}</tbody></table>
   <p class="sig">Applicator Signature: <span class="sig-line"></span></p>
   <p>Notes: _______________________________________________</p>
   </body></html>`;
