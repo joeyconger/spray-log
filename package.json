@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "build": "esbuild src/app.jsx --bundle --minify --outfile=public/bundle.js --platform=browser",
+    "build": "esbuild src/app.jsx --bundle --minify --outfile=public/bundle.js --platform=browser --jsx=automatic",
     "dev": "node server.js",
     "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
