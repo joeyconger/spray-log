@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
+import * as XLSX from 'xlsx';
 
 const LISTS = ["TAC 100", "TAC 295 Big Spray", "TAC 295 Small Spray", "Trails"];
 
@@ -101,6 +102,38 @@ async function getWeather(lat, lon, dateStr, timeStr) {
 }
 
 // ── Job list parser ───────────────────────────────────────────────────────────
+function parseExcel(arrayBuffer) {
+  const wb = XLSX.read(arrayBuffer, { type: 'array' });
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
+  if (rows.length < 2) return [];
+
+  // Map header names to job fields (case-insensitive, flexible)
+  const FIELD_MAP = {
+    name: ["name","job name","site","location","site name"],
+    address: ["address","addr","street","street address"],
+    code: ["code","job code","id"],
+    miles: ["miles","mi","distance"],
+    linearFeet: ["linear feet","linear ft","linear","lin ft","lin feet","lf"],
+    acreage: ["acreage","acres","ac"],
+  };
+  const headers = rows[0].map(h => String(h).trim().toLowerCase());
+  const colFor = field => {
+    const aliases = FIELD_MAP[field];
+    const idx = headers.findIndex(h => aliases.includes(h));
+    return idx === -1 ? null : idx;
+  };
+  const cols = Object.fromEntries(Object.keys(FIELD_MAP).map(f => [f, colFor(f)]));
+
+  return rows.slice(1)
+    .filter(row => row.some(c => String(c).trim()))
+    .map(row => {
+      const get = f => cols[f] !== null ? String(row[cols[f]]||"").trim() : "";
+      return { name:get("name"), address:get("address"), code:get("code"), miles:get("miles"), linearFeet:get("linearFeet"), acreage:get("acreage") };
+    })
+    .filter(j => j.name);
+}
+
 function parseJobs(text) {
   const SKIP = /^(maintenance trails|date|name|address|miles|linear feet|linear ft|acreage|\d+|\s*✕\s*)$/i;
   const IS_ADDR = /^\d+\s+[a-z]/i;
@@ -259,12 +292,16 @@ function UploadTab({ jobLists, setJobLists }) {
   const handleFile = async file => {
     if (!file) return;
     const ext = file.name.split(".").pop().toLowerCase();
-    if (!["docx","txt"].includes(ext)) { setStatus("❌ Use .docx or .txt"); return; }
-    setLoading(true); setStatus("Extracting text…");
+    if (!["docx","txt","xlsx","xls"].includes(ext)) { setStatus("❌ Use .xlsx, .xls, .docx, or .txt"); return; }
+    setLoading(true); setStatus("Extracting…");
     try {
-      let txt = "";
-      if (ext==="docx") {
-        // Lazy-load mammoth only when a .docx is actually dropped
+      if (ext==="xlsx" || ext==="xls") {
+        const ab = await file.arrayBuffer();
+        const jobs = parseExcel(ab);
+        if (!jobs.length) { setStatus("❌ No jobs found — make sure row 1 has a 'Name' column"); setLoading(false); return; }
+        setJobLists({...jobLists, [list]: jobs});
+        setStatus(`✅ Imported ${jobs.length} jobs from "${file.name}" to "${list}"`);
+      } else if (ext==="docx") {
         if (!window.mammoth) {
           await new Promise((resolve, reject) => {
             const s = document.createElement('script');
@@ -275,12 +312,12 @@ function UploadTab({ jobLists, setJobLists }) {
         }
         const ab = await file.arrayBuffer();
         const res = await mammoth.extractRawText({ arrayBuffer: ab });
-        txt = res.value||"";
+        setPaste(res.value||""); setMode("paste");
+        setStatus("✅ Text extracted — review then click Parse & Save");
       } else {
-        txt = await file.text();
+        setPaste(await file.text()); setMode("paste");
+        setStatus("✅ Text loaded — review then click Parse & Save");
       }
-      setPaste(txt); setMode("paste");
-      setStatus("✅ Text extracted — review then click Parse & Save");
     } catch(e) { setStatus("❌ "+e.message); }
     setLoading(false);
   };
@@ -328,9 +365,9 @@ function UploadTab({ jobLists, setJobLists }) {
                  textAlign:"center",cursor:loading?"wait":"pointer",background:dragOver?"#f0f7eb":"#fafafa",marginBottom:12}}>
             <div style={{fontSize:22}}>📄</div>
             <div style={{fontSize:13,color:"#888",marginTop:4}}>
-              {loading ? "Extracting…" : "Drop .docx or .txt here, or click to browse"}
+              {loading ? "Extracting…" : "Drop .xlsx, .xls, .docx, or .txt here, or click to browse"}
             </div>
-            <input ref={fileRef} type="file" accept=".docx,.txt" style={{display:"none"}}
+            <input ref={fileRef} type="file" accept=".xlsx,.xls,.docx,.txt" style={{display:"none"}}
               onChange={e => handleFile(e.target.files[0])} />
           </div>
           <textarea value={pasteText} onChange={e => setPaste(e.target.value)}
