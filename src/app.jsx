@@ -439,13 +439,22 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs }) {
   const jobs     = jobLists[listName]||[];
   const isTAC100 = listName==="TAC 100";
 
+  // Build a set of job names already committed to a saved log for this list
+  const loggedNames = new Set(
+    completedLogs
+      .filter(log => log.listName === listName)
+      .flatMap(log => log.entries?.map(e => e.job.name) || [])
+  );
+
+  const unlogged = jobs.filter(j => !loggedNames.has(j.name));
+
   const searchLower = search.toLowerCase();
   const filtered = search.trim()
-    ? jobs.filter(j =>
+    ? unlogged.filter(j =>
         j.name?.toLowerCase().includes(searchLower) ||
         j.code?.toLowerCase().includes(searchLower) ||
         j.address?.toLowerCase().includes(searchLower))
-    : jobs;
+    : unlogged;
 
   const sorted = [...pending].sort((a,b) => a.jobIdx - b.jobIdx);
 
@@ -503,7 +512,14 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs }) {
     setBatchLabel("");
   };
 
-  const counts = Object.fromEntries(LISTS.map(l => [l, (jobLists[l]||[]).length]));
+  // Show remaining (unlogged) count on each list button
+  const counts = Object.fromEntries(LISTS.map(l => {
+    const all = jobLists[l]||[];
+    const doneNames = new Set(
+      completedLogs.filter(log => log.listName === l).flatMap(log => log.entries?.map(e => e.job.name) || [])
+    );
+    return [l, all.filter(j => !doneNames.has(j.name)).length];
+  }));
 
   return (
     <div>
@@ -563,7 +579,9 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs }) {
             <input value={search} onChange={e => setSearch(e.target.value)}
               placeholder="Search by name, code, or address…"
               style={{width:"100%",padding:"8px 12px",border:"1px solid #ccc",borderRadius:7,fontSize:13,marginBottom:8}} />
-            <div style={{fontSize:11,color:"#aaa",marginBottom:6}}>{filtered.length} job{filtered.length!==1?"s":""} · click to log</div>
+            <div style={{fontSize:11,color:"#aaa",marginBottom:6}}>
+              {filtered.length} remaining{loggedNames.size > 0 ? ` · ${loggedNames.size} logged` : ""} · click to log
+            </div>
             <div style={{display:"flex",flexDirection:"column",gap:4,maxHeight:520,overflowY:"auto",paddingRight:4}}>
               {filtered.map((job, fi) => {
                 const idx      = jobs.indexOf(job);
