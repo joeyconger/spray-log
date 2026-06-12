@@ -14,7 +14,7 @@ console.log('DATA_FILE:', DATA_FILE);
 console.log('__dirname:', __dirname);
 
 app.use(express.json({ limit: '2mb' }));
-app.use(express.static(path.join(__dirname)));
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 function load() {
   try { return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')); } catch { return {}; }
