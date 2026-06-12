@@ -8,6 +8,7 @@ const db = new Database(DB_PATH);
 
 app.use(express.json({ limit: '2mb' }));
 app.use(express.static(__dirname));
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
