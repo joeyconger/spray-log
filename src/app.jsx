@@ -128,6 +128,104 @@ const TAC_295_BIG_ACQUISITION_LOTS = [
   {code:"AL1153",name:"4137 N Frankford Pl",address:"4137 N Frankford Pl",miles:"",linearFeet:"",acreage:"0.22"},
 ];
 
+const TAC_295_BIG_DETENTION_PONDS = [
+  {code:"DB3001",name:"WALNUT CREEK",address:"3200 E 85 PL",miles:"",linearFeet:"",acreage:"1.15"},
+  {code:"DB3002",name:"SHADOW MOUNTAIN",address:"7300 E 61 PL (TWO PONDS)",miles:"",linearFeet:"",acreage:"0.81"},
+  {code:"DB3003",name:"WEDGEWOOD VI",address:"6300 S 109 E AVE",miles:"",linearFeet:"",acreage:"2.68"},
+  {code:"DB3004",name:"LIVINGSTONE PARK",address:"6100 S RICHMOND",miles:"",linearFeet:"",acreage:"3.27"},
+  {code:"DB3005",name:"SHADOW MOUNTAIN",address:"6614 E 65 PL",miles:"",linearFeet:"",acreage:"0.30"},
+  {code:"DB3006",name:"SHERIDAN PARK POND",address:"10400 S 67 E AVE",miles:"",linearFeet:"",acreage:"3.00"},
+  {code:"DB3007",name:"OSAGE DETENTION POND",address:"1101 W PINE ST",miles:"",linearFeet:"",acreage:"35.00"},
+  {code:"DB3008",name:"AIRPORT INDUSTRIAL CENTER",address:"1100 N 143 E AVE",miles:"",linearFeet:"",acreage:"2.65"},
+  {code:"DB3009",name:"AIRPORT INDUSTRIAL CENTER",address:"1200 N 143 E AVE",miles:"",linearFeet:"",acreage:"1.10"},
+  {code:"DB3010",name:"BROOKWOOD II",address:"8300 S URBANA",miles:"",linearFeet:"",acreage:"4.88"},
+  {code:"DB3011",name:"BISHOP TRACT",address:"3600 S 103 E AVE",miles:"",linearFeet:"",acreage:"32.75"},
+  {code:"DB3012",name:"BURNING TREE",address:"6400 S 89 E AVE",miles:"",linearFeet:"",acreage:"1.00"},
+  {code:"DB3013",name:"BURNING TREE",address:"6600 S 90 E AVE",miles:"",linearFeet:"",acreage:"1.00"},
+  {code:"DB3014",name:"CHIMNEY HILLS S EXTENTION",address:"9100 S 69 E AVE",miles:"",linearFeet:"",acreage:"3.00"},
+  {code:"DB3015",name:"CHIMNEY HILLS - B",address:"8700 S 72 E AVE",miles:"",linearFeet:"",acreage:"0.74"},
+  {code:"DB3016",name:"CHIMNEY HILLS",address:"9100 S 72 E AVE",miles:"",linearFeet:"",acreage:"2.27"},
+  {code:"DB3017",name:"FIELDSTONE",address:"5500 E 115 ST",miles:"",linearFeet:"",acreage:"1.83"},
+  {code:"DB3018",name:"HIGHFIELD",address:"4200 E 109 ST",miles:"",linearFeet:"",acreage:"1.47"},
+  {code:"DB3019",name:"LIVINGSTONE PARK",address:"6500 S PITTSBURG",miles:"",linearFeet:"",acreage:"0.28"},
+  {code:"DB3020",name:"OAKLEAF B",address:"8800 E 91 PL",miles:"",linearFeet:"",acreage:"2.75"},
+  {code:"DB3021",name:"OAKLEAF B",address:"9100 S 85 E AVE",miles:"",linearFeet:"",acreage:"2.86"},
+  {code:"DB3022",name:"PORKCHOP (METCALF)",address:"1200 S MINGO RD",miles:"",linearFeet:"",acreage:"41.87"},
+  {code:"DB3023",name:"PARK PLAZA EAST III",address:"3700 S 130 E AVE",miles:"",linearFeet:"",acreage:"11.25"},
+  {code:"DB3024",name:"PLEASANT VALLEY EAST",address:"8100 S JOPLIN",miles:"",linearFeet:"",acreage:"2.41"},
+  {code:"DB3025",name:"SHADOW MOUNTIAN A",address:"6900 S 78 E AVE",miles:"",linearFeet:"",acreage:"0.35"},
+  {code:"DB3027",name:"SILVER OAKS III",address:"7800 S URBANA",miles:"",linearFeet:"",acreage:"0.68"},
+  {code:"DB3028",name:"SUMMERFIELD A",address:"3600 S 137 E AVE",miles:"",linearFeet:"",acreage:"1.83"},
+  {code:"DB3029",name:"SUMMERFIELD B",address:"3300 S 141 E AVE",miles:"",linearFeet:"",acreage:"1.03"},
+  {code:"DB3030",name:"SUMMERFIELD C",address:"3300 S 137 E AVE",miles:"",linearFeet:"",acreage:"0.88"},
+  {code:"DB3031",name:"SUN MEADOW II",address:"9700 S YALE",miles:"",linearFeet:"",acreage:"2.00"},
+  {code:"DB3032",name:"SWEETBRIER E EXTENTION",address:"7528 E 77 ST",miles:"",linearFeet:"",acreage:"1.20"},
+  {code:"DB3033",name:"TOWN CENTER II",address:"4500 S GARNETT",miles:"",linearFeet:"",acreage:"8.19"},
+  {code:"DB3034",name:"WEDGEWOOD VIII",address:"6100 S 110 E AVE",miles:"",linearFeet:"",acreage:"3.40"},
+  {code:"DB3035",name:"WHISPERING MEADOWS",address:"2800 S 123 E AVE",miles:"",linearFeet:"",acreage:"13.22"},
+  {code:"DB3036",name:"WOODLAND MEADOWS",address:"8100 S 86 E AVE",miles:"",linearFeet:"",acreage:"1.98"},
+  {code:"DB3037",name:"WOODLAND MEADOWS",address:"7700 S 88 E AVE",miles:"",linearFeet:"",acreage:"1.37"},
+  {code:"DB3038",name:"WOODLAND HILLS MALL",address:"6600 S 90 E AVE",miles:"",linearFeet:"",acreage:"12.04"},
+  {code:"DB3039",name:"WOODLAND VIEW PARK SOUTH",address:"6100 S 87 E AVE",miles:"",linearFeet:"",acreage:"1.24"},
+  {code:"DB3040",name:"TUPELO",address:"1500 S 115 E AVE",miles:"",linearFeet:"",acreage:"33.00"},
+  {code:"DB3041",name:"PROPOSED DETENTION POND",address:"2100 S 119 E AVE",miles:"",linearFeet:"",acreage:"5.00"},
+  {code:"DB3042",name:"MINSHALL PARK II",address:"7600 S SHERIDAN",miles:"",linearFeet:"",acreage:"7.50"},
+  {code:"DB3043",name:"MAYFAIR",address:"5100 W 1ST",miles:"",linearFeet:"",acreage:"7.50"},
+  {code:"DB3044",name:"ALSUMA - TOP AND SLOPES ONLY",address:"4800 S 101 E AVE",miles:"",linearFeet:"",acreage:"8.50"},
+  {code:"DB3047",name:"GREENWOOD",address:"701 E MARSHALL ST",miles:"",linearFeet:"",acreage:"9.50"},
+  {code:"DB3048",name:"BRIDAL TRAILS",address:"9800 S 74 E AVE",miles:"",linearFeet:"",acreage:"22.90"},
+  {code:"DB3050",name:"GREENWOOD",address:"620 E LATIMER ST",miles:"",linearFeet:"",acreage:"9.50"},
+  {code:"DB3051",name:"WOODLAND HILLS SOUTH",address:"7400 S 89 E AVE",miles:"",linearFeet:"",acreage:"10.40"},
+  {code:"DB3052",name:"WOODLAND HILLS SOUTH",address:"7400 S 88 E AVE",miles:"",linearFeet:"",acreage:"7.20"},
+  {code:"DB3053",name:"WOODLAND HILLS SOUTH",address:"7400 S 87 E AVE",miles:"",linearFeet:"",acreage:"6.20"},
+  {code:"DB3055",name:"PARK TERRANCE SOUTH II",address:"3900 S 117 E AVE",miles:"",linearFeet:"",acreage:"0.76"},
+  {code:"DB3057",name:"JONES DETENTION POND",address:"1400 S 77 E AVE",miles:"",linearFeet:"",acreage:"14.60"},
+  {code:"DB3058",name:"DETENTION POND - CAMELOT",address:"10300 S GRANITE",miles:"",linearFeet:"",acreage:"9.00"},
+  {code:"DB3060",name:"EAST PARK",address:"2800 S 129 E AVE",miles:"",linearFeet:"",acreage:"8.80"},
+  {code:"DB3061",name:"WEXFORD",address:"10300 S YALE",miles:"",linearFeet:"",acreage:"3.00"},
+  {code:"DB3062",name:"SHERIDAN SOUTH",address:"9300 S NORWOOD",miles:"",linearFeet:"",acreage:"1.93"},
+  {code:"DB3063",name:"CHIMNEY HILLS D",address:"8700 S MEMORIAL",miles:"",linearFeet:"",acreage:"5.00"},
+  {code:"DB3064",name:"REDFORD",address:"2100 S 101 E AVE",miles:"",linearFeet:"",acreage:"19.00"},
+  {code:"DB3065",name:"NELSON DETENTION POND",address:"2501 S 92 E AVE",miles:"",linearFeet:"",acreage:"28.00"},
+  {code:"DB3066",name:"LONGVIEW DETENTION POND",address:"2626 S 96 E AVE",miles:"",linearFeet:"",acreage:"15.50"},
+  {code:"DB3069",name:"RB-11 SANDITAN",address:"4700 S 109 E AVE",miles:"",linearFeet:"",acreage:"30.71"},
+  {code:"DB3070",name:"RB-12 GOLDEN VALLEY",address:"10700 E 56TH ST",miles:"",linearFeet:"",acreage:"50.00"},
+  {code:"DB3071",name:"HAMPTON S OFFSITE DETENTION P-18",address:"7500 S GARNETT",miles:"",linearFeet:"",acreage:"16.14"},
+  {code:"DB3072",name:"HEATHERRIDGE WETLANDS",address:"9300 S 71 E AVE",miles:"",linearFeet:"",acreage:"6.50"},
+  {code:"DB3074",name:"HUNTERS BEND",address:"11100 S YALE",miles:"",linearFeet:"",acreage:"6.76"},
+  {code:"DB3075",name:"WINSOR PARK SOUTH",address:"7100 S OSWEGO",miles:"",linearFeet:"",acreage:"2.75"},
+  {code:"DB3077",name:"SOUTHERN TRIBS RB-9",address:"4100 S 118 E AVE",miles:"",linearFeet:"",acreage:"20.51"},
+  {code:"DB3079",name:"LB-7 U 2",address:"1350 S JOPLIN AVE",miles:"",linearFeet:"",acreage:"12.18"},
+  {code:"DB3080",name:"LB-7 E L",address:"1419 S 79 E AVE",miles:"",linearFeet:"",acreage:"8.11"},
+  {code:"DB3081",name:"RB-6-C LEWIS AND CLARK",address:"1000 S GARNETT RD",miles:"",linearFeet:"",acreage:"12.34"},
+  {code:"DB3084",name:"OSAGE EXTENTION 1",address:"2900 N CINCINNATI",miles:"",linearFeet:"",acreage:"8.50"},
+  {code:"DB3085",name:"OSAGE EXTENTION 2",address:"3000 N CINCINNATI",miles:"",linearFeet:"",acreage:"2.10"},
+  {code:"DB3086",name:"BROOKWOOD",address:"8100 S YALE",miles:"",linearFeet:"",acreage:"13.60"},
+  {code:"DB3087",name:"LB11BL ALEXANDER TRUST",address:"4500 S 91 E AVE",miles:"",linearFeet:"",acreage:"12.50"},
+  {code:"DB3088",name:"VERN RAYBURN",address:"4800 W 8 ST",miles:"",linearFeet:"",acreage:"6.00"},
+  {code:"DB3089",name:"RB8A BROOKHOLLOW",address:"11707 E 31ST ST",miles:"",linearFeet:"",acreage:"37.00"},
+  {code:"DB3090",name:"DETENTION POND",address:"1500 S CINCINNATI",miles:"",linearFeet:"",acreage:"1.00"},
+  {code:"DB3091",name:"(STREET WIDENING POND)",address:"2400 S GARNETT",miles:"",linearFeet:"",acreage:"11.84"},
+  {code:"DB3092",name:"MS-06 (CAROL WILLIAMS)",address:"600 S MINGO RD",miles:"",linearFeet:"",acreage:"4.50"},
+  {code:"DB3093",name:"SHERRELWOOD DETENTION POND",address:"7100 S BIRMINGHAM",miles:"",linearFeet:"",acreage:"0.77"},
+  {code:"DB3094",name:"SMITTLE DETENTION POND",address:"2200 S 133 E AVE",miles:"",linearFeet:"",acreage:"4.66"},
+  {code:"DB3096",name:"MAGIC CIRCLE DETENTION POND",address:"11102 E 17 PL",miles:"",linearFeet:"",acreage:"0.75"},
+  {code:"DB3097",name:"HWY 11 WETLANDS",address:"3241 N BIRMINGHAM",miles:"",linearFeet:"",acreage:"2.50"},
+  {code:"DB3099",name:"YALE WIDENING POND",address:"7211 S URBANA AV",miles:"",linearFeet:"",acreage:"2.40"},
+  {code:"DB3100",name:"W.R.A.P. (WAL-MART) POND",address:"10938 S MEMORIAL DR",miles:"",linearFeet:"",acreage:"4.56"},
+  {code:"DB3101",name:"CLOVERDALE",address:"1572 S 79 EA",miles:"",linearFeet:"",acreage:"0.25"},
+  {code:"DB3111",name:"QUIKTRIP",address:"6100 S HIGHWAY 169",miles:"",linearFeet:"",acreage:"7.73"},
+  {code:"DB3113",name:"DIRTY BUTTER WETLAND",address:"3200 N PEORIA",miles:"",linearFeet:"",acreage:"6.04"},
+  {code:"DB3114",name:"GILCREASE NORTHEAST",address:"1701 W UNION",miles:"",linearFeet:"",acreage:"9.17"},
+  {code:"DB3115",name:"GILCREASE SOUTHEAST",address:"1700 W UNION",miles:"",linearFeet:"",acreage:"3.71"},
+  {code:"DB3116",name:"GILCREASE NORTHWEST",address:"2501 GILCREASE EXPRESSWAY",miles:"",linearFeet:"",acreage:"9.15"},
+  {code:"DB3117",name:"GILCREASE SOUTHWEST",address:"2500 GILCREASE EXPRESSWAY",miles:"",linearFeet:"",acreage:"9.74"},
+  {code:"DB3118",name:"BRIAN GLEN EAST",address:"12506 E 35ST S",miles:"",linearFeet:"",acreage:"1.75"},
+  {code:"DB3119",name:"GILCREASE MUSEUM",address:"1900 N UNION AVE (WET POND)",miles:"",linearFeet:"",acreage:"3.80"},
+  {code:"DB3120",name:"WILSHIRE MANOR",address:"2142 S DELAWARE CT.",miles:"",linearFeet:"",acreage:"1.41"},
+  {code:"DB3121",name:"METRO PARK",address:"6100 S 118 E AVE",miles:"",linearFeet:"",acreage:"2.88"},
+];
+
 const TAC_100_JOBS = [
   {code:"1",name:"1700 S. 119th E. Ave",address:"",miles:"",linearFeet:"",acreage:"4.1"},
   {code:"2",name:"3100 S. 101st E. Ave",address:"",miles:"",linearFeet:"",acreage:"8.67"},
@@ -801,7 +899,7 @@ function ChemTab({ chemDefaults, setChemDefaults }) {
 function App() {
   const [tab, setTab]                     = useState("Jobs");
   const [ready, setReady]                 = useState(false);
-  const [jobLists, setJobLists]           = useLS("spraylog_jobs",  {"TAC 100":TAC_100_JOBS,"TAC 295 Big Spray":TAC_295_BIG_ACQUISITION_LOTS,[LISTS[2]]:[],[LISTS[3]]:[]}, "/api/job-lists");
+  const [jobLists, setJobLists]           = useLS("spraylog_jobs",  {"TAC 100":TAC_100_JOBS,"TAC 295 Big Spray":[...TAC_295_BIG_ACQUISITION_LOTS,...TAC_295_BIG_DETENTION_PONDS],[LISTS[2]]:[],[LISTS[3]]:[]}, "/api/job-lists");
   const [chemDefaults, setChemDefaults]   = useLS("spraylog_chem",  DEFAULT_CHEM, "/api/chem-defaults");
   const [completedLogs, setCompletedLogs] = useLS("spraylog_logs",  [], "/api/logs");
   const totalJobs = Object.values(jobLists).flat().length;
@@ -813,7 +911,7 @@ function App() {
         if (data.logs?.length)                                          setCompletedLogs(data.logs);
         // Always use hard-coded TAC 100; merge other lists from server
         if (data.jobLists) {
-          setJobLists(prev => ({ ...data.jobLists, "TAC 100": TAC_100_JOBS, "TAC 295 Big Spray": TAC_295_BIG_ACQUISITION_LOTS }));
+          setJobLists(prev => ({ ...data.jobLists, "TAC 100": TAC_100_JOBS, "TAC 295 Big Spray": [...TAC_295_BIG_ACQUISITION_LOTS, ...TAC_295_BIG_DETENTION_PONDS] }));
         }
       }
       setReady(true);
