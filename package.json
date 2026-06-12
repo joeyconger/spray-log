@@ -20,10 +20,12 @@
     "node": ">=18"
   },
   "dependencies": {
-    "esbuild": "^0.28.1",
     "express": "^4.22.2",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7",
     "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.1",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
   }
 }
