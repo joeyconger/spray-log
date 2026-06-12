@@ -11,6 +11,8 @@ app.use(express.json({ limit: '2mb' }));
 app.use(express.static(__dirname));
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+
 function load() {
   try { return JSON.parse(fs.readFileSync(DATA_PATH, 'utf8')); } catch { return {}; }
 }

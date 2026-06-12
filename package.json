@@ -2,7 +2,7 @@
   "name": "spray-log",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "build": "esbuild src/app.jsx --bundle --minify --outfile=public/bundle.js --platform=browser",
     "dev": "node server.js",
