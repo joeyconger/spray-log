@@ -1,3 +1,7 @@
+console.log('Starting server...');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('PORT env:', process.env.PORT);
+
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
@@ -5,6 +9,9 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const DATA_FILE = path.join(__dirname, 'data.json');
+console.log('PORT:', PORT);
+console.log('DATA_FILE:', DATA_FILE);
+console.log('__dirname:', __dirname);
 
 app.use(express.json({ limit: '2mb' }));
 app.use(express.static(path.join(__dirname)));
