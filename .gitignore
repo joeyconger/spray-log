@@ -1,3 +1,4 @@
 node_modules/
 spraylog.db
 public/bundle.js
+!public/.gitkeep
