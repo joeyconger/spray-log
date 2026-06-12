@@ -446,7 +446,8 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs }) {
       .flatMap(log => log.entries?.map(e => e.job.name) || [])
   );
 
-  const unlogged = jobs.filter(j => !loggedNames.has(j.name));
+  const pendingIdxs = new Set(pending.map(e => e.jobIdx));
+  const unlogged = jobs.filter((j, idx) => !loggedNames.has(j.name) && !pendingIdxs.has(idx));
 
   const searchLower = search.toLowerCase();
   const filtered = search.trim()
@@ -597,7 +598,6 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs }) {
                     <div style={{fontSize:11,color:isActive?"#b5d4a0":"#999",marginTop:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
                       {job.address}{job.miles?` · ${job.miles} mi`:""}{job.acreage?` · ${job.acreage} ac`:""}
                     </div>
-                    {inLog && !isActive && <div style={{fontSize:10,color:"#2d5a1b",marginTop:2,fontWeight:600}}>✓ in log</div>}
                   </div>
                 );
               })}
