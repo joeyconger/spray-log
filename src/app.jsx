@@ -265,6 +265,81 @@ const TAC_295_BIG_EARTHEN_CHANNELS = [
   {code:"EC4055",name:"FORD CREEK",address:"11302 E. 51st ST. S",miles:"",linearFeet:"",acreage:"10"},
 ];
 
+const TAC_295_BIG_LINED_CHANNELS = [
+  {code:"LC2001",name:"TUPELO CREEK",address:"2200 S 121 E AVE",miles:"",linearFeet:"625",acreage:"0.42"},
+  {code:"LC2003",name:"TUPELO CREEK",address:"2140 S 129 E AVE",miles:"",linearFeet:"20",acreage:"0.44"},
+  {code:"LC2005",name:"FULTON CREEK",address:"3400 S 88 E AVE",miles:"",linearFeet:"2629",acreage:"3.16"},
+  {code:"LC2006",name:"JOE CREEK TRIB",address:"6110 S LEWIS AVE",miles:"",linearFeet:"948",acreage:"1.18"},
+  {code:"LC2007",name:"LITTLE JOE CREEK",address:"5400 S SHERIDAN RD",miles:"",linearFeet:"3902",acreage:"3.11"},
+  {code:"LC2008",name:"LITTLE JOE CREEK",address:"5322 S 67 E PL",miles:"",linearFeet:"1144",acreage:"1.13"},
+  {code:"LC2009",name:"VALLEY VIEW CREEK",address:"520 E 56 S N",miles:"",linearFeet:"5470",acreage:"6.03"},
+  {code:"LC2011",name:"FLATROCK CREEK TRIBUTARY",address:"3320 N. GARRISON AVE",miles:"",linearFeet:"1150",acreage:"0.31"},
+  {code:"LC2014",name:"DIRTY BUTTER CREEK",address:"607 E WOODROW PL",miles:"",linearFeet:"900",acreage:"1.81"},
+  {code:"LC2015",name:"COAL CREEK",address:"1500 N SANDUSKY AVE",miles:"",linearFeet:"4367",acreage:"7.45"},
+  {code:"LC2016",name:"VENSEL CREEK",address:"9100 S FLORENCE AVE",miles:"",linearFeet:"7850",acreage:"3.64"},
+  {code:"LC2017",name:"PERRYMAN DITCH",address:"4914 S YORKTOWN AVE",miles:"",linearFeet:"760",acreage:"0.48"},
+  {code:"LC2019",name:"FRED CREEK",address:"6700 S LOUISVILLE AVE",miles:"",linearFeet:"348",acreage:"0.79"},
+  {code:"LC2020",name:"PARKVIEW CHANNEL",address:"120 S 41 W AVE",miles:"",linearFeet:"10360",acreage:"13.79"},
+  {code:"LC2021",name:"UPPER MINGO CREEK",address:"6400 S 90 E AVE",miles:"",linearFeet:"1235",acreage:"0.19"},
+  {code:"LC2022",name:"PEARY CREEK",address:"2100 S HWY 169 RAMP",miles:"",linearFeet:"1050",acreage:"0.73"},
+  {code:"LC2023",name:"PEARY CREEK",address:"2100 S 108 E AVE",miles:"",linearFeet:"290",acreage:"0.5"},
+  {code:"LC2026",name:"JONES CREEK",address:"1712 S 71 E AVE",miles:"",linearFeet:"2106",acreage:"0.6"},
+  {code:"LC2027",name:"ALSUMA CREEK",address:"5500 S 94 E AVE",miles:"",linearFeet:"1980",acreage:"2.05"},
+  {code:"LC2028",name:"UPPER MINGO CREEK",address:"6100 S 89 E AVE",miles:"",linearFeet:"4570",acreage:"0.72"},
+  {code:"LC2029",name:"HAIKEY CREEK",address:"7700 S 69 E PL",miles:"",linearFeet:"1800",acreage:"0.99"},
+  {code:"LC2030",name:"VERN RAYBURN CHANNEL",address:"4800 W 8 ST",miles:"",linearFeet:"3178",acreage:"10"},
+  {code:"LC2032",name:"DIRTY BUTTER CREEK",address:"1900 N UNION AVE",miles:"",linearFeet:"993",acreage:"0.82"},
+  {code:"LC2033",name:"JOE CREEK, SOUTH FORK",address:"4316 E 60 PL",miles:"",linearFeet:"257",acreage:"0.18"},
+  {code:"LC2034",name:"COAL CREEK TRIBUTARY",address:"7100 E ARCHER ST",miles:"",linearFeet:"774",acreage:"0.34"},
+  {code:"LC2035",name:"TUPELO CREEK",address:"11904 E 17TH ST",miles:"",linearFeet:"600",acreage:"0.29"},
+  {code:"LC2038",name:"JOE CREEK, SOUTH FORK",address:"6100 S HUDSON AVE",miles:"",linearFeet:"210",acreage:"0.15"},
+  {code:"LC2039",name:"AUDUBON CREEK",address:"3002 S 86 E AVE",miles:"",linearFeet:"4850",acreage:"8.9"},
+  {code:"LC2040",name:"REDFORK CREEK",address:"4300 S ZENITH AVE",miles:"",linearFeet:"3190",acreage:"3"},
+  {code:"LC2041",name:"CHERRY CREEK",address:"4700 S ELWOOD AVE",miles:"",linearFeet:"6190",acreage:"12.5"},
+  {code:"LC2042",name:"ALSUMA OUTFALL",address:"4600 S 102 E AVE",miles:"",linearFeet:"140",acreage:"0.51"},
+  {code:"LC2043",name:"JOE CREEK",address:"5300 S EVANSTON AVE",miles:"",linearFeet:"8196",acreage:"32.37"},
+  {code:"LC2044",name:"BROOKHOLLOW TRIBUTARY",address:"3900 S 131 E AVE",miles:"",linearFeet:"2500",acreage:"1.65"},
+  {code:"LC2048",name:"CATFISH CREEK",address:"11119 E 56 ST",miles:"",linearFeet:"2307",acreage:"2.1"},
+  {code:"LC2051",name:"JOE CREEK, SOUTH FORK",address:"5500 S HARVARD AVE",miles:"",linearFeet:"1650",acreage:"1.08"},
+  {code:"LC2054",name:"DIRTY BUTTER CREEK",address:"900 E APACHE",miles:"",linearFeet:"700",acreage:"1.3"},
+  {code:"LC2055",name:"DIRTY BUTTER CREEK",address:"MOHAWK AND PEORIA",miles:"",linearFeet:"2495",acreage:"9.2"},
+  {code:"LC2056",name:"MILL CREEK",address:"1100 S MEMORIAL DR",miles:"",linearFeet:"5395",acreage:"7.5"},
+  {code:"LC2057",name:"TUPELO CREEK",address:"500 S MINGO RD",miles:"",linearFeet:"3000",acreage:"6.04"},
+  {code:"LC2058",name:"FRED CREEK",address:"7400 S GARY AVE",miles:"",linearFeet:"132",acreage:"1.25"},
+  {code:"LC2060",name:"COOLEY CREEK, BRIDGE 251",address:"1100 S 138 E AVE",miles:"",linearFeet:"734",acreage:"1.5"},
+  {code:"LC2061",name:"COOLEY CREEK, PHASE II",address:"10200 E ADMIRAL",miles:"",linearFeet:"1621",acreage:"4"},
+  {code:"LC2063",name:"FRED CREEK",address:"7400 S HARVARD",miles:"",linearFeet:"95",acreage:"2.9"},
+  {code:"LC2064",name:"FORD CREEK",address:"5150 S 122 E AVE",miles:"",linearFeet:"2950",acreage:"0.56"},
+  {code:"LC2065",name:"BROOKHOLLOW CREEK",address:"2800 S 137TH E AVE",miles:"",linearFeet:"1394",acreage:"6.5"},
+  {code:"LC2068",name:"TUPELO CREEK",address:"1250 S 120 E AVE",miles:"",linearFeet:"1600",acreage:"2.33"},
+  {code:"LC2069",name:"MINGO MAINSTEM",address:"5800 S MINGO",miles:"",linearFeet:"246",acreage:"1.5"},
+  {code:"LC2070",name:"FLATROCK CREEK TRIBUTARY",address:"715 E 39 ST N",miles:"",linearFeet:"805",acreage:"1.68"},
+  {code:"LC2072",name:"BELL CREEK",address:"9200 E. 40th PL.",miles:"",linearFeet:"4499",acreage:"0.3"},
+  {code:"LC2073",name:"JOE CREEK, EAST BRANCH (MM)",address:"3200 S SANDUSKY",miles:"",linearFeet:"722",acreage:"0.19"},
+  {code:"LC2074",name:"PEARY CREEK, (REDFORD)",address:"1660 S 101 EA",miles:"",linearFeet:"1226",acreage:"1.17"},
+  {code:"LC2075",name:"FRY DITCH CHANNEL",address:"9600 S SHERIDAN RD",miles:"",linearFeet:"665",acreage:"0.38"},
+  {code:"LC2077",name:"COOLEY CREEK, (COTM)",address:"1003 N 129 E AVE",miles:"",linearFeet:"225",acreage:"0.2"},
+  {code:"LC2078",name:"AUDUBON CREEK",address:"7600 E 31 ST",miles:"",linearFeet:"675",acreage:"0.61"},
+  {code:"LC2079",name:"AUDUBON CREEK",address:"6600 E 31 ST",miles:"",linearFeet:"1600",acreage:"2.2"},
+  {code:"LC2080",name:"BROOKHOLLOW CREEK",address:"2900 S 118 E AVE",miles:"",linearFeet:"1789",acreage:"2.46"},
+  {code:"LC2081",name:"SPUNKY CREEK, TRIBUTARY",address:"17212 E 11TH",miles:"",linearFeet:"585",acreage:"0.33"},
+  {code:"LC2082",name:"MOOSER CREEK",address:"3200 W 53 ST",miles:"",linearFeet:"1224",acreage:"1.12"},
+  {code:"LC2084",name:"LITTLE JOE CREEK",address:"5500 S YALE AVE",miles:"",linearFeet:"7138",acreage:"9.83"},
+  {code:"LC2086",name:"BELL CREEK",address:"8900 E 39 ST",miles:"",linearFeet:"2800",acreage:"5.5"},
+  {code:"LC2087",name:"BELL CREEK, TRIBUTARY",address:"8800 E 46 PL",miles:"",linearFeet:"2253",acreage:"3"},
+  {code:"LC2089",name:"BROOKHOLLOW CREEK, TRIB",address:"3200 S GARNETT",miles:"",linearFeet:"1300",acreage:"0.74"},
+  {code:"LC2090",name:"FRED CREEK, (ORU)",address:"7600 S EVANSTON",miles:"",linearFeet:"",acreage:"2.04"},
+  {code:"LC2091",name:"LITTLE HAIKEY CREEK",address:"7100 S 74 E AVE",miles:"",linearFeet:"2050",acreage:"0.8"},
+  {code:"LC2092",name:"LITTLE HAIKEY CREEK, TRIB",address:"8700 S 74 E AVE",miles:"",linearFeet:"1000",acreage:"1.06"},
+  {code:"LC2093",name:"LITTLE HAIKEY CREEK",address:"9000 S. 92 E. Ave",miles:"",linearFeet:"680",acreage:"0.76"},
+  {code:"LC2094",name:"TUPELO CHANNEL",address:"1100 S GARNETT",miles:"",linearFeet:"",acreage:"1.2"},
+  {code:"LC2095",name:"LITTLE JOE - SOUTH FORK",address:"5900 S NEW HAVEN AVE",miles:"",linearFeet:"",acreage:"1.05"},
+  {code:"LC2098",name:"COAL CREEK",address:"2100 N DARLINGTON AV",miles:"",linearFeet:"",acreage:"4.15"},
+  {code:"LC2101",name:"FRED CREEK",address:"7400 S PITTSBURG AV",miles:"",linearFeet:"",acreage:"2.04"},
+  {code:"LC2103",name:"CHIMNEY HILLS",address:"8700 S MEMORIAL DR",miles:"",linearFeet:"",acreage:"2.3"},
+  {code:"LC2105",name:"FRED CREEK",address:"7400 S. FLORENCE",miles:"",linearFeet:"",acreage:"2.04"},
+];
+
 const TAC_100_JOBS = [
   {code:"1",name:"1700 S. 119th E. Ave",address:"",miles:"",linearFeet:"",acreage:"4.1"},
   {code:"2",name:"3100 S. 101st E. Ave",address:"",miles:"",linearFeet:"",acreage:"8.67"},
@@ -938,7 +1013,7 @@ function ChemTab({ chemDefaults, setChemDefaults }) {
 function App() {
   const [tab, setTab]                     = useState("Jobs");
   const [ready, setReady]                 = useState(false);
-  const [jobLists, setJobLists]           = useLS("spraylog_jobs",  {"TAC 100":TAC_100_JOBS,"TAC 295 Big Spray":[...TAC_295_BIG_ACQUISITION_LOTS,...TAC_295_BIG_DETENTION_PONDS,...TAC_295_BIG_EARTHEN_CHANNELS],[LISTS[2]]:[],[LISTS[3]]:[]}, "/api/job-lists");
+  const [jobLists, setJobLists]           = useLS("spraylog_jobs",  {"TAC 100":TAC_100_JOBS,"TAC 295 Big Spray":[...TAC_295_BIG_ACQUISITION_LOTS,...TAC_295_BIG_DETENTION_PONDS,...TAC_295_BIG_EARTHEN_CHANNELS,...TAC_295_BIG_LINED_CHANNELS],[LISTS[2]]:[],[LISTS[3]]:[]}, "/api/job-lists");
   const [chemDefaults, setChemDefaults]   = useLS("spraylog_chem",  DEFAULT_CHEM, "/api/chem-defaults");
   const [completedLogs, setCompletedLogs] = useLS("spraylog_logs",  [], "/api/logs");
   const totalJobs = Object.values(jobLists).flat().length;
@@ -950,7 +1025,7 @@ function App() {
         if (data.logs?.length)                                          setCompletedLogs(data.logs);
         // Always use hard-coded TAC 100; merge other lists from server
         if (data.jobLists) {
-          setJobLists(prev => ({ ...data.jobLists, "TAC 100": TAC_100_JOBS, "TAC 295 Big Spray": [...TAC_295_BIG_ACQUISITION_LOTS, ...TAC_295_BIG_DETENTION_PONDS, ...TAC_295_BIG_EARTHEN_CHANNELS] }));
+          setJobLists(prev => ({ ...data.jobLists, "TAC 100": TAC_100_JOBS, "TAC 295 Big Spray": [...TAC_295_BIG_ACQUISITION_LOTS, ...TAC_295_BIG_DETENTION_PONDS, ...TAC_295_BIG_EARTHEN_CHANNELS, ...TAC_295_BIG_LINED_CHANNELS] }));
         }
       }
       setReady(true);
