@@ -1381,7 +1381,12 @@ function LogsTab({ completedLogs, setCompletedLogs }) {
               </div>
               <div style={{display:"flex",gap:6,flexShrink:0,alignItems:"center"}}>
                 {log.isBatch ? (
+                  <>
                   <button onClick={() => reprintBatch(log)} style={{padding:"5px 10px",background:"#2d5a1b",color:"#fff",border:"none",borderRadius:5,fontSize:11}}>🖨 Reprint</button>
+                  {log.listName==="TAC 100" && (
+                    <button onClick={() => openPrint(pesticideBatchHTML(log.entries, log.chem||DEFAULT_CHEM[log.listName]))} style={{padding:"5px 10px",background:"#1a3d6e",color:"#fff",border:"none",borderRadius:5,fontSize:11}}>Application</button>
+                  )}
+                  </>
                 ) : (
                   <>
                     <button onClick={() => openPrint(trailsHTML([{job:log.job,weather:log.weather}],log.listName))} style={{padding:"5px 10px",background:"#2d5a1b",color:"#fff",border:"none",borderRadius:5,fontSize:11}}>Log</button>
