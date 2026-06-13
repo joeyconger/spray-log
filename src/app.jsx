@@ -1053,7 +1053,7 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs, allP
       if (hw) {
         weather = {
           temp: Math.round(hw.temperature_2m[hour]),
-          wind: Math.round(hw.windspeed_10m[hour]),
+          wind: Math.min(Math.round(hw.windspeed_10m[hour]), 9),
           windDir: degToDir(hw.winddirection_10m[hour]),
           sky: skyFromCloud(hw.cloudcover[hour]),
         };
