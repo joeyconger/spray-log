@@ -600,10 +600,10 @@ const TAC_100_JOBS = [
 ];
 
 const DEFAULT_CHEM = {
-  "TAC 100":             { pesticide:"Glyphosate", tradeName:"Round Up Custom", manufacturer:"Monsanto", tankConc:"1%", epaReg:"524-343", epaEst:"524-IA-1", applicatorType:"Recirculating Sprayer", ratePerAcre:"12 oz per acre", gallonsMixture:"", amountApplied:"", rateCarrier:"" },
-  "TAC 295 Big Spray":   { pesticide:"Glyphosate", tradeName:"Round Up Custom", manufacturer:"Monsanto", tankConc:"1%", epaReg:"524-343", epaEst:"524-IA-1", applicatorType:"Recirculating Sprayer", ratePerAcre:"12 oz per acre", gallonsMixture:"", amountApplied:"", rateCarrier:"" },
-  "TAC 295 Small Spray": { pesticide:"Glyphosate", tradeName:"Round Up Custom", manufacturer:"Monsanto", tankConc:"1%", epaReg:"524-343", epaEst:"524-IA-1", applicatorType:"Recirculating Sprayer", ratePerAcre:"12 oz per acre", gallonsMixture:"", amountApplied:"", rateCarrier:"" },
-  "Trails":              { pesticide:"Glyphosate", tradeName:"Round Up Custom", manufacturer:"Monsanto", tankConc:"1%", epaReg:"524-343", epaEst:"524-IA-1", applicatorType:"Recirculating Sprayer", ratePerAcre:"12 oz per acre", gallonsMixture:"", amountApplied:"", rateCarrier:"" },
+  "TAC 100":             { pesticide:"Glyphosate", tradeName:"Round Up Custom", manufacturer:"Monsanto", tankConc:"1%", epaReg:"524-343", epaEst:"524-IA-1", applicatorType:"Recirculating Sprayer", ratePerAcre:"12 oz per acre", gallonsPerAcre:"10", surfactantPerAcre:"0.025", rateCarrier:"" },
+  "TAC 295 Big Spray":   { pesticide:"Glyphosate", tradeName:"Round Up Custom", manufacturer:"Monsanto", tankConc:"1%", epaReg:"524-343", epaEst:"524-IA-1", applicatorType:"Recirculating Sprayer", ratePerAcre:"12 oz per acre", gallonsPerAcre:"10", surfactantPerAcre:"0.025", rateCarrier:"" },
+  "TAC 295 Small Spray": { pesticide:"Glyphosate", tradeName:"Round Up Custom", manufacturer:"Monsanto", tankConc:"1%", epaReg:"524-343", epaEst:"524-IA-1", applicatorType:"Recirculating Sprayer", ratePerAcre:"12 oz per acre", gallonsPerAcre:"10", surfactantPerAcre:"0.025", rateCarrier:"" },
+  "Trails":              { pesticide:"Glyphosate", tradeName:"Round Up Custom", manufacturer:"Monsanto", tankConc:"1%", epaReg:"524-343", epaEst:"524-IA-1", applicatorType:"Recirculating Sprayer", ratePerAcre:"12 oz per acre", gallonsPerAcre:"10", surfactantPerAcre:"0.025", rateCarrier:"" },
 };
 
 // ── API helpers ───────────────────────────────────────────────────────────────
@@ -802,6 +802,18 @@ function trailsHTML(entries, listName) {
 function pesticideHTML(job, weather, chem) {
   const f = (label, val, full) =>
     `<div class="field${full?' full':''}"><label>${label}</label><span>${val||""}</span></div>`;
+
+  // Auto-calculate per-job fields from acreage
+  const acres = parseFloat(job.acreage || job.miles || 0);
+  const gpa   = parseFloat(chem.gallonsPerAcre || 0);
+  const surf  = parseFloat(chem.surfactantPerAcre || 0);
+  const ozRate = parseFloat((chem.ratePerAcre || "").match(/[\d.]+/)?.[0] || 0);
+
+  const gallonsMixture = acres && gpa  ? (acres * gpa).toFixed(2) + " gal" : (chem.gallonsMixture || "");
+  const amountApplied  = acres && ozRate ? (acres * ozRate).toFixed(1) + " oz" : "";
+  const rateCarrier    = acres && gpa
+    ? (acres * gpa).toFixed(2) + " gal water" + (surf ? " / " + (acres * surf).toFixed(4) + " gal surf" : "")
+    : (chem.rateCarrier || "");
   return `<div class="record">
   <h2>Pesticide Application Record</h2>
   <h3>City of Tulsa / Stormwater Maintenance Division</h3><hr/>
@@ -812,10 +824,10 @@ function pesticideHTML(job, weather, chem) {
     ${f("Acres Treated",job.acreage||job.miles)} ${f("Target Species","Noxious Vegetation")}
     ${f("Pesticide Applied",chem.pesticide)} ${f("Trade Name",chem.tradeName)}
     ${f("Manufacturer",chem.manufacturer)} ${f("Tank Mix Concentration",chem.tankConc)}
-    ${f("Gallons of Mixture",chem.gallonsMixture)} ${f("EPA Reg No.",chem.epaReg)}
+    ${f("Gallons of Mixture",gallonsMixture)} ${f("EPA Reg No.",chem.epaReg)}
     ${f("EPA Est No.",chem.epaEst)} ${f("Type of Applicator",chem.applicatorType)}
-    ${f("Rate of Application",chem.ratePerAcre)} ${f("Amount Applied",chem.amountApplied)}
-    ${f("Rate of Carrier",chem.rateCarrier)}
+    ${f("Rate of Application",chem.ratePerAcre)} ${f("Amount Applied",amountApplied)}
+    ${f("Rate of Carrier (Water / Surfactant)",rateCarrier,true)}
   </div><hr/>
   <div class="grid">
     ${f("Weather Conditions",weather?.sky)} ${f("Temperature °F",weather?.temp)}
@@ -1413,7 +1425,7 @@ function ChemTab({ chemDefaults, setChemDefaults }) {
     ["pesticide","Pesticide Applied"],["tradeName","Trade Name"],["manufacturer","Manufacturer"],
     ["tankConc","Tank Mix Concentration"],["epaReg","EPA Reg No."],["epaEst","EPA Est No."],
     ["applicatorType","Type of Applicator"],["ratePerAcre","Rate of Application (per acre)"],
-    ["gallonsMixture","Gallons of Mixture"],["amountApplied","Amount Applied"],["rateCarrier","Rate of Carrier"],
+    ["gallonsPerAcre","Carrier Gallons per Acre (for auto-calc)"],["surfactantPerAcre","Surfactant Gallons per Acre (for auto-calc)"],
   ];
   return (
     <div>
