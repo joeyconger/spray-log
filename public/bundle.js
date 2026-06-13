@@ -43,7 +43,7 @@ Error generating stack: `+t.message+`
   <table><thead><tr>${u}</tr></thead><tbody>${d}</tbody></table>
   <p class="sig">Applicator Signature: <span class="sig-line"></span></p>
   <p>Notes: _______________________________________________</p>
-  </body></html>`}function Kg(e,a,l){let t=(A,r,E)=>`<div class="field${E?" full":""}"><label>${A}</label><span>${r||""}</span></div>`,n=parseFloat(e.acreage||e.miles||0),i=parseFloat(l.gallonsPerAcre||0),u=parseFloat(l.surfactantPerAcre||0),c=parseFloat((l.ratePerAcre||"").match(/[\d.]+/)?.[0]||0),d=n&&i?(n*i).toFixed(2)+" gal":l.gallonsMixture||"",s=n&&c?(n*c).toFixed(1)+" oz":"",o=n&&i?(n*i).toFixed(2)+" gal water"+(u?" / "+(n*u).toFixed(4)+" gal surf":""):l.rateCarrier||"";return`<div class="record">
+  </body></html>`}function Kg(e,a,l){let t=(A,r,E)=>`<div class="field${E?" full":""}"><label>${A}</label><span>${r||""}</span></div>`,n=parseFloat(e.acreage||e.miles||0),i=parseFloat(l.gallonsPerAcre||0),u=parseFloat(l.surfactantPerAcre||0),c=parseFloat((l.ratePerAcre||"").match(/[\d.]+/)?.[0]||0),d=n&&i?(n*i).toFixed(2)+" gal":l.gallonsMixture||"",s=n&&c?(Math.ceil(n*c*10)/10).toFixed(1)+" oz":"",o=n&&i?(n*i).toFixed(2)+" gal water"+(u?" / "+(n*u).toFixed(4)+" gal surf":""):l.rateCarrier||"";return`<div class="record">
   <h2>Pesticide Application Record</h2>
   <h3>City of Tulsa / Stormwater Maintenance Division</h3><hr/>
   <div class="grid">

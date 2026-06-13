@@ -810,7 +810,7 @@ function pesticideHTML(job, weather, chem) {
   const ozRate = parseFloat((chem.ratePerAcre || "").match(/[\d.]+/)?.[0] || 0);
 
   const gallonsMixture = acres && gpa  ? (acres * gpa).toFixed(2) + " gal" : (chem.gallonsMixture || "");
-  const amountApplied  = acres && ozRate ? (acres * ozRate).toFixed(1) + " oz" : "";
+  const amountApplied  = acres && ozRate ? (Math.ceil(acres * ozRate * 10) / 10).toFixed(1) + " oz" : "";
   const rateCarrier    = acres && gpa
     ? (acres * gpa).toFixed(2) + " gal water" + (surf ? " / " + (acres * surf).toFixed(4) + " gal surf" : "")
     : (chem.rateCarrier || "");
