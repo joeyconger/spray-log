@@ -30,7 +30,7 @@ function setKey(key, val) { const d = load(); d[key] = val; save(d); }
 app.get('/',                (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 app.get('/api/all',         (req, res) => {
   const d = load();
-  const lists = ['TAC 100', 'TAC 295 Big Spray', 'TAC 295 Small Spray', 'Trails'];
+  const lists = ['TAC 100', 'TAC 295 Big Spray', 'TAC 295 Small Spray', 'Trails', 'Parks'];
   const pending = {};
   lists.forEach(l => { pending[l] = d['pending-' + l] || []; });
   res.json({ jobLists: d['job-lists'] || {}, chemDefaults: d['chem-defaults'] || {}, logs: d['logs'] || [], pending });

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
 
-const LISTS = ["TAC 100", "TAC 295 Big Spray", "TAC 295 Small Spray", "Trails"];
+const LISTS = ["TAC 100", "TAC 295 Big Spray", "TAC 295 Small Spray", "Trails", "Parks"];
 
 const TAC_295_BIG_ACQUISITION_LOTS = [
   {code:"AL1006",name:"MINGO",address:"200 S 94 E AVE",miles:"",linearFeet:"",acreage:"90.00"},
@@ -493,6 +493,35 @@ const TAC_295_SMALL_JOBS = [
   {code:"1150",name:"3908 S Evanston",address:"3908 S Evanston",miles:"",linearFeet:"",acreage:"0.25"},
 ];
 
+const PARKS_JOBS = [
+  {code:"",name:"5800 S Mingo",address:"",miles:"",linearFeet:"",acreage:"1.30"},
+  {code:"",name:"32nd & Garnett",address:"",miles:"",linearFeet:"",acreage:"4.76"},
+  {code:"",name:"1124 N Mingo",address:"",miles:"",linearFeet:"",acreage:"1.20"},
+  {code:"",name:"10626 E Admiral Pl",address:"",miles:"",linearFeet:"",acreage:"0.89"},
+  {code:"",name:"9547 E Newton Pl",address:"",miles:"",linearFeet:"",acreage:"0.76"},
+  {code:"",name:"Aaronson",address:"",miles:"",linearFeet:"",acreage:"1.40"},
+  {code:"",name:"7807 E 58th",address:"",miles:"",linearFeet:"",acreage:"2.86"},
+  {code:"",name:"66th & Memorial",address:"",miles:"",linearFeet:"",acreage:"2.51"},
+  {code:"",name:"6100 S Riverside",address:"",miles:"",linearFeet:"",acreage:"4.40"},
+  {code:"",name:"8802 S Delaware",address:"",miles:"",linearFeet:"",acreage:"2.40"},
+  {code:"",name:"Riggs",address:"",miles:"",linearFeet:"",acreage:"2.62"},
+  {code:"",name:"10250 S Louisville",address:"",miles:"",linearFeet:"",acreage:"1.87"},
+  {code:"",name:"3267 E 101st",address:"",miles:"",linearFeet:"",acreage:"0.48"},
+  {code:"",name:"Hunter Park",address:"",miles:"",linearFeet:"",acreage:"5.77"},
+  {code:"",name:"84th & Harvard",address:"",miles:"",linearFeet:"",acreage:"4.13"},
+  {code:"",name:"4530 S Jackson",address:"",miles:"",linearFeet:"",acreage:"0.78"},
+  {code:"",name:"2198 W 42nd Pl",address:"",miles:"",linearFeet:"",acreage:"0.52"},
+  {code:"",name:"3215 W 31st",address:"",miles:"",linearFeet:"",acreage:"2.26"},
+  {code:"",name:"3060 W 78th",address:"",miles:"",linearFeet:"",acreage:"1.76"},
+  {code:"",name:"3824 N Delaware",address:"",miles:"",linearFeet:"",acreage:"0.96"},
+  {code:"",name:"10300 S 94th E Ave",address:"",miles:"",linearFeet:"",acreage:"1.56"},
+  {code:"",name:"9706 E 85th Pl",address:"",miles:"",linearFeet:"",acreage:"0.75"},
+  {code:"",name:"9191 S Mingo",address:"",miles:"",linearFeet:"",acreage:"3.35"},
+  {code:"",name:"8921 S Mingo",address:"",miles:"",linearFeet:"",acreage:"0.75"},
+  {code:"",name:"7924 E 89th Ct",address:"",miles:"",linearFeet:"",acreage:"2.30"},
+  {code:"",name:"7954 S 78th E Ave",address:"",miles:"",linearFeet:"",acreage:"2.20"},
+];
+
 const TAC_100_JOBS = [
   {code:"1",name:"1700 S. 119th E. Ave",address:"",miles:"",linearFeet:"",acreage:"4.1"},
   {code:"2",name:"3100 S. 101st E. Ave",address:"",miles:"",linearFeet:"",acreage:"8.67"},
@@ -670,7 +699,7 @@ async function getWeather(lat, lon, dateStr, timeStr) {
 
 // ── Print builders ────────────────────────────────────────────────────────────
 function trailsHTML(entries, listName) {
-  const isTAC100    = listName === "TAC 100";
+  const isTAC100    = listName === "TAC 100" || listName === "Parks";
   const isBig       = listName === "TAC 295 Big Spray";
   const isSmall     = listName === "TAC 295 Small Spray";
   const isTrails    = listName === "Trails";
@@ -1232,7 +1261,7 @@ function ChemTab({ chemDefaults, setChemDefaults }) {
 function App() {
   const [tab, setTab]                     = useState("Jobs");
   const [ready, setReady]                 = useState(false);
-  const [jobLists, setJobLists]           = useLS("spraylog_jobs",  {"TAC 100":TAC_100_JOBS,"TAC 295 Big Spray":[...TAC_295_BIG_ACQUISITION_LOTS,...TAC_295_BIG_DETENTION_PONDS,...TAC_295_BIG_EARTHEN_CHANNELS,...TAC_295_BIG_LINED_CHANNELS],"TAC 295 Small Spray":TAC_295_SMALL_JOBS,"Trails":TRAILS_JOBS}, "/api/job-lists");
+  const [jobLists, setJobLists]           = useLS("spraylog_jobs",  {"TAC 100":TAC_100_JOBS,"TAC 295 Big Spray":[...TAC_295_BIG_ACQUISITION_LOTS,...TAC_295_BIG_DETENTION_PONDS,...TAC_295_BIG_EARTHEN_CHANNELS,...TAC_295_BIG_LINED_CHANNELS],"TAC 295 Small Spray":TAC_295_SMALL_JOBS,"Trails":TRAILS_JOBS,"Parks":PARKS_JOBS}, "/api/job-lists");
   const [chemDefaults, setChemDefaults]   = useLS("spraylog_chem",  DEFAULT_CHEM, "/api/chem-defaults");
   const [completedLogs, setCompletedLogs] = useLS("spraylog_logs",  [], "/api/logs");
   const [allPending, setAllPending]       = useLS("spraylog_pending2", EMPTY_PENDING);
@@ -1245,7 +1274,7 @@ function App() {
         if (data.logs?.length)                                          setCompletedLogs(data.logs);
         // Always use hard-coded TAC 100; merge other lists from server
         if (data.jobLists) {
-          setJobLists(prev => ({ ...data.jobLists, "TAC 100": TAC_100_JOBS, "TAC 295 Big Spray": [...TAC_295_BIG_ACQUISITION_LOTS, ...TAC_295_BIG_DETENTION_PONDS, ...TAC_295_BIG_EARTHEN_CHANNELS, ...TAC_295_BIG_LINED_CHANNELS], "TAC 295 Small Spray": TAC_295_SMALL_JOBS, "Trails": TRAILS_JOBS }));
+          setJobLists(prev => ({ ...data.jobLists, "TAC 100": TAC_100_JOBS, "TAC 295 Big Spray": [...TAC_295_BIG_ACQUISITION_LOTS, ...TAC_295_BIG_DETENTION_PONDS, ...TAC_295_BIG_EARTHEN_CHANNELS, ...TAC_295_BIG_LINED_CHANNELS], "TAC 295 Small Spray": TAC_295_SMALL_JOBS, "Trails": TRAILS_JOBS, "Parks": PARKS_JOBS }));
         }
         // Restore pending from server if localStorage is empty
         if (data.pending) {
