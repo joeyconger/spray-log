@@ -1403,7 +1403,7 @@ function App() {
         }
       }
       setReady(true);
-    });
+    }).catch(() => setReady(true));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!ready) return (
