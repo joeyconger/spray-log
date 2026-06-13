@@ -880,6 +880,9 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs, allP
   const [panel, setPanel]           = useState(null);
   const [showLabel, setShowLabel]   = useState(false);
   const [batchLabel, setBatchLabel] = useState("");
+  const [showPaste, setShowPaste]   = useState(false);
+  const [pasteText, setPasteText]   = useState("");
+  const [pasteStatus, setPasteStatus] = useState("");
   const [lastDate, setLastDate]     = useState(
     () => localStorage.getItem("spraylog_lastDate") || new Date().toISOString().slice(0,10)
   );
@@ -972,6 +975,86 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs, allP
     setBatchLabel("");
   };
 
+  const doPasteImport = async () => {
+    setPasteStatus("Parsing…");
+    const lines = pasteText.trim().split("\n").map(l => l.trim()).filter(Boolean);
+    const parsed = [];
+    for (const line of lines) {
+      // Support tab-separated or comma-separated
+      const cols = line.includes("\t") ? line.split("\t") : line.split(",");
+      const clean = cols.map(c => c.trim());
+      // Expected: Name, Date, StartTime, EndTime, Acres
+      // OR: Name, Date, StartTime-EndTime, Acres (time range in one col)
+      let name, date, timeStart, timeEnd, acreage;
+      if (clean.length >= 5) {
+        [name, date, timeStart, timeEnd, acreage] = clean;
+      } else if (clean.length === 4) {
+        [name, date] = clean;
+        const range = clean[2];
+        const dash = range.indexOf("-");
+        timeStart = dash > -1 ? range.slice(0, dash).trim() : range;
+        timeEnd   = dash > -1 ? range.slice(dash+1).trim() : "";
+        acreage   = clean[3];
+      } else {
+        continue;
+      }
+      if (!name || !date) continue;
+      // Normalize date to YYYY-MM-DD for weather fetch
+      const parts = date.split("/");
+      let isoDate = date;
+      if (parts.length === 3) {
+        const [m,d,y] = parts;
+        isoDate = `${y.padStart(4,"20")}-${m.padStart(2,"0")}-${d.padStart(2,"0")}`;
+      }
+      parsed.push({name, date, isoDate, timeStart:timeStart||"", timeEnd:timeEnd||"", acreage:acreage||""});
+    }
+    if (!parsed.length) { setPasteStatus("No valid rows found. Expected: Name, Date, Start, End, Acres"); return; }
+
+    // Fetch weather for unique dates
+    setPasteStatus(`Fetching weather for ${parsed.length} jobs…`);
+    const uniqueDates = [...new Set(parsed.map(e => e.isoDate))];
+    const weatherByDate = {};
+    const degToDir = deg => { const dirs=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW']; return dirs[Math.round(deg/22.5)%16]; };
+    const skyFromCloud = cc => cc < 25 ? "Clear" : cc < 60 ? "Partly Cloudy" : "Overcast";
+    const parseHour12 = t => { if (!t) return 10; const m=t.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i); if(!m)return 10; let h=parseInt(m[1]); const ap=(m[3]||"").toUpperCase(); if(ap==="PM"&&h!==12)h+=12; if(ap==="AM"&&h===12)h=0; return h; };
+
+    for (const d of uniqueDates) {
+      try {
+        const past = new Date(d+"T12:00:00") < new Date();
+        const base = past ? "https://archive-api.open-meteo.com/v1/archive" : "https://api.open-meteo.com/v1/forecast";
+        const url = `${base}?latitude=36.154&longitude=-95.993&hourly=temperature_2m,windspeed_10m,winddirection_10m,cloudcover&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=America%2FChicago&start_date=${d}&end_date=${d}`;
+        const r = await fetch(url);
+        const data = await r.json();
+        weatherByDate[d] = data.hourly;
+      } catch(e) {
+        weatherByDate[d] = null;
+      }
+    }
+
+    // Build pending entries and add to queue
+    const newEntries = parsed.map((e, i) => {
+      const hw = weatherByDate[e.isoDate];
+      const hour = parseHour12(e.timeStart);
+      let weather = {sky:"", temp:"", wind:"", windDir:""};
+      if (hw) {
+        weather = {
+          temp: Math.round(hw.temperature_2m[hour]),
+          wind: Math.round(hw.windspeed_10m[hour]),
+          windDir: degToDir(hw.winddirection_10m[hour]),
+          sky: skyFromCloud(hw.cloudcover[hour]),
+        };
+      }
+      const job = {name:e.name, date:e.date, timeStart:e.timeStart, timeEnd:e.timeEnd, acreage:e.acreage, address:"", miles:"", linearFeet:"", code:""};
+      // Use a large jobIdx offset to avoid colliding with real list indices
+      return {jobIdx: 100000 + Date.now() + i, job, weather};
+    });
+
+    setPending(prev => [...prev, ...newEntries]);
+    setShowPaste(false);
+    setPasteText("");
+    setPasteStatus("");
+  };
+
   // Show remaining (unlogged) count on each list button
   const counts = Object.fromEntries(LISTS.map(l => {
     const all = jobLists[l]||[];
@@ -983,9 +1066,25 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs, allP
 
   return (
     <div>
-      <div style={{marginBottom:isBigSpray?8:16}}>
-        <ListPicker value={listName} onChange={l => { setListName(l); setBigSub("ALL"); setPanel(null); setSearch(""); }} counts={counts} />
+      <div style={{marginBottom:isBigSpray?8:16,display:"flex",alignItems:"flex-start",gap:8,flexWrap:"wrap"}}>
+        <div style={{flex:1}}><ListPicker value={listName} onChange={l => { setListName(l); setBigSub("ALL"); setPanel(null); setSearch(""); }} counts={counts} /></div>
+        <button onClick={() => { setShowPaste(true); setPasteStatus(""); }} style={{padding:"7px 14px",background:"#5a8a3a",color:"#fff",border:"none",borderRadius:6,fontSize:12,fontWeight:700,whiteSpace:"nowrap"}}>📋 Paste Jobs</button>
       </div>
+
+      {showPaste && (
+        <div style={{background:"#f0f7eb",border:"1.5px solid #5a8a3a",borderRadius:8,padding:"14px",marginBottom:16}}>
+          <div style={{fontWeight:700,fontSize:13,color:"#2d5a1b",marginBottom:6}}>Paste jobs — one per line, tab or comma separated:</div>
+          <div style={{fontSize:11,color:"#666",marginBottom:8}}>Format: <code>Name, Date, Start Time, End Time, Acres</code> &nbsp;(e.g. <code>Hunter Park, 6/8/2026, 10:40 AM, 11:25 AM, 5.77</code>)</div>
+          <textarea value={pasteText} onChange={e => setPasteText(e.target.value)}
+            placeholder={"Hunter Park\t6/8/2026\t10:40 AM\t11:25 AM\t5.77\nRiggs\t6/8/2026\t8:40 AM\t9:12 AM\t2.62"}
+            style={{width:"100%",height:140,fontSize:12,fontFamily:"monospace",padding:8,border:"1px solid #bbb",borderRadius:5,boxSizing:"border-box",resize:"vertical"}} />
+          {pasteStatus && <div style={{fontSize:12,color:"#2d5a1b",margin:"6px 0",fontStyle:"italic"}}>{pasteStatus}</div>}
+          <div style={{display:"flex",gap:8,marginTop:8}}>
+            <button onClick={doPasteImport} style={{padding:"7px 18px",background:"#1a3d6e",color:"#fff",border:"none",borderRadius:5,fontSize:12,fontWeight:700}}>Fetch Weather & Add to Queue</button>
+            <button onClick={() => { setShowPaste(false); setPasteText(""); setPasteStatus(""); }} style={{padding:"7px 12px",background:"none",border:"1px solid #bbb",borderRadius:5,fontSize:12,color:"#888"}}>Cancel</button>
+          </div>
+        </div>
+      )}
       {isBigSpray && (
         <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:16}}>
           {BIG_SPRAY_SUBS.map(s => (
