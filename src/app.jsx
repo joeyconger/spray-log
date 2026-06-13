@@ -1058,7 +1058,10 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs, allP
           sky: skyFromCloud(hw.cloudcover[hour]),
         };
       }
-      const job = {name:e.name, date:e.date, timeStart:e.timeStart, timeEnd:e.timeEnd, acreage:e.acreage, address:"", miles:"", linearFeet:"", code:""};
+      // Fill in acreage from the current list's job data if not provided in paste
+      const listJob = (jobLists[listName]||[]).find(j => j.name.toLowerCase()===e.name.toLowerCase());
+      const acreage = e.acreage || listJob?.acreage || "";
+      const job = {name:e.name, date:e.date, timeStart:e.timeStart, timeEnd:e.timeEnd, acreage, address:listJob?.address||"", miles:listJob?.miles||"", linearFeet:listJob?.linearFeet||"", code:listJob?.code||""};
       // Use a large jobIdx offset to avoid colliding with real list indices
       return {jobIdx: 100000 + Date.now() + i, job, weather};
     });
