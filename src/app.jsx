@@ -979,36 +979,50 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs, allP
     setPasteStatus("Parsing…");
     const lines = pasteText.trim().split("\n").map(l => l.trim()).filter(Boolean);
     const parsed = [];
+
+    // Add AM/PM to bare times like "1:39" based on workday heuristic
+    const inferAmPm = t => {
+      const m = t.match(/^(\d{1,2}):(\d{2})$/);
+      if (!m) return t; // already has AM/PM or unrecognized
+      const h = parseInt(m[1]);
+      const suffix = (h >= 1 && h <= 6) ? " PM" : " AM";
+      return t + suffix;
+    };
+
     for (const line of lines) {
-      // Support tab-separated or comma-separated
-      const cols = line.includes("\t") ? line.split("\t") : line.split(",");
-      const clean = cols.map(c => c.trim());
-      // Expected: Name, Date, StartTime, EndTime, Acres
-      // OR: Name, Date, StartTime-EndTime, Acres (time range in one col)
-      let name, date, timeStart, timeEnd, acreage;
-      if (clean.length >= 5) {
-        [name, date, timeStart, timeEnd, acreage] = clean;
-      } else if (clean.length === 4) {
-        [name, date] = clean;
-        const range = clean[2];
-        const dash = range.indexOf("-");
-        timeStart = dash > -1 ? range.slice(0, dash).trim() : range;
-        timeEnd   = dash > -1 ? range.slice(dash+1).trim() : "";
-        acreage   = clean[3];
+      // Detect date pattern M/D/YYYY anywhere in the line
+      const dateMatch = line.match(/\b(\d{1,2}\/\d{1,2}\/\d{2,4})\b/);
+      if (!dateMatch) continue;
+      const date = dateMatch[1];
+      const dateIdx = line.indexOf(date);
+      const name = line.slice(0, dateIdx).trim();
+      const rest = line.slice(dateIdx + date.length).trim();
+
+      // Detect time range: H:MM-H:MM or H:MM AM - H:MM PM etc
+      const timeMatch = rest.match(/(\d{1,2}:\d{2}(?:\s*[AP]M)?)\s*[-–]\s*(\d{1,2}:\d{2}(?:\s*[AP]M)?)/i);
+      let timeStart = "", timeEnd = "", acreage = "";
+      if (timeMatch) {
+        timeStart = inferAmPm(timeMatch[1].trim());
+        timeEnd   = inferAmPm(timeMatch[2].trim());
+        const afterTime = rest.slice(rest.indexOf(timeMatch[0]) + timeMatch[0].length).trim();
+        acreage = afterTime.match(/[\d.]+/) ? afterTime.match(/[\d.]+/)[0] : "";
       } else {
-        continue;
+        // Single time or no time
+        const singleTime = rest.match(/(\d{1,2}:\d{2}(?:\s*[AP]M)?)/i);
+        if (singleTime) timeStart = inferAmPm(singleTime[1].trim());
+        acreage = rest.replace(/[\d:APM\s/:-]+/gi,"").trim();
       }
+
       if (!name || !date) continue;
-      // Normalize date to YYYY-MM-DD for weather fetch
       const parts = date.split("/");
       let isoDate = date;
       if (parts.length === 3) {
         const [m,d,y] = parts;
-        isoDate = `${y.padStart(4,"20")}-${m.padStart(2,"0")}-${d.padStart(2,"0")}`;
+        isoDate = `${y.length===2?"20"+y:y}-${m.padStart(2,"0")}-${d.padStart(2,"0")}`;
       }
-      parsed.push({name, date, isoDate, timeStart:timeStart||"", timeEnd:timeEnd||"", acreage:acreage||""});
+      parsed.push({name, date, isoDate, timeStart, timeEnd, acreage});
     }
-    if (!parsed.length) { setPasteStatus("No valid rows found. Expected: Name, Date, Start, End, Acres"); return; }
+    if (!parsed.length) { setPasteStatus("No valid rows found — make sure each line has a date like 6/8/2026"); return; }
 
     // Fetch weather for unique dates
     setPasteStatus(`Fetching weather for ${parsed.length} jobs…`);
