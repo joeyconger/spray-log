@@ -650,6 +650,44 @@ function parseTimeInput(val) {
   return { start: val.trim(), end: "" };
 }
 
+// Parse "10:49 AM" -> minutes since midnight
+function timeToMin(t) {
+  if (!t) return null;
+  const m = t.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+  if (!m) return null;
+  let h = parseInt(m[1]), min = parseInt(m[2]);
+  const ap = (m[3]||"").toUpperCase();
+  if (ap==="PM" && h!==12) h+=12;
+  if (ap==="AM" && h===12) h=0;
+  return h*60+min;
+}
+
+// Add minutes to a "10:49 AM" string, return formatted string
+function addMinutes(t, delta) {
+  const base = timeToMin(t);
+  if (base == null) return "";
+  const total = base + delta;
+  let h = Math.floor(total/60) % 24, min = total % 60;
+  const ap = h >= 12 ? "PM" : "AM";
+  const h12 = h % 12 || 12;
+  return `${h12}:${String(min).padStart(2,"0")} ${ap}`;
+}
+
+// Find last logged duration (minutes) for a job name across completedLogs
+function lastDuration(jobName, completedLogs) {
+  for (const log of completedLogs) {
+    const entries = log.entries || (log.job ? [log] : []);
+    for (const e of entries) {
+      const jn = (e.job||e)?.name;
+      if (jn !== jobName) continue;
+      const job = e.job || e;
+      const start = timeToMin(job.timeStart), end = timeToMin(job.timeEnd);
+      if (start != null && end != null && end > start) return end - start;
+    }
+  }
+  return null;
+}
+
 async function geocode(address) {
   if (geocodeCache.has(address)) return geocodeCache.get(address);
   try {
@@ -1217,16 +1255,39 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs, allP
 
                 <div style={{marginBottom:14}}>
                   <div style={{fontSize:11,fontWeight:700,color:"#555",textTransform:"uppercase",letterSpacing:.4,marginBottom:4}}>
-                    Time &nbsp;<span style={{fontSize:10,color:"#aaa",fontWeight:400}}>e.g. 10:49 AM - 11:30 AM · Enter to fetch</span>
+                    Time &nbsp;<span style={{fontSize:10,color:"#aaa",fontWeight:400}}>e.g. 10:49 AM · Enter to fetch</span>
                   </div>
-                  <input value={panel.timeRaw||""} placeholder="10:49 AM - 11:30 AM"
+                  <input value={panel.timeRaw||""} placeholder="10:49 AM"
                     onChange={e => {
                       const raw = e.target.value;
                       const { start, end } = parseTimeInput(raw);
-                      setPanel(p => ({...p, timeRaw:raw, timeStart:start, timeEnd:end, weather:null, status:""}));
+                      // Compute end time suggestion from last log of this job
+                      let endSuggestion = null;
+                      if (start && !end) {
+                        const dur = lastDuration(job.name, completedLogs);
+                        if (dur) endSuggestion = { end: addMinutes(start, dur), dur };
+                      }
+                      setPanel(p => ({...p, timeRaw:raw, timeStart:start, timeEnd:end, weather:null, status:"", endSuggestion: end ? null : endSuggestion}));
                     }}
-                    onKeyDown={e => { if(e.key==="Enter") doFetch(); }}
+                    onKeyDown={e => {
+                      if (e.key==="Enter") {
+                        if (panel.endSuggestion && !panel.timeEnd) {
+                          // Accept suggestion and fetch weather
+                          const suggested = panel.endSuggestion.end;
+                          setPanel(p => ({...p, timeEnd:suggested, timeRaw:(p.timeStart+" - "+suggested), endSuggestion:null}));
+                          setTimeout(doFetch, 0);
+                        } else {
+                          doFetch();
+                        }
+                      }
+                    }}
                     style={{width:"100%",padding:"7px 10px",border:"1px solid #bbb",borderRadius:5,fontSize:13}} />
+                  {panel.endSuggestion && !panel.timeEnd && (
+                    <div style={{marginTop:6,padding:"7px 10px",background:"#fffbe6",border:"1px solid #f0d060",borderRadius:5,fontSize:12,color:"#7a5c00",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                      <span>Last time took {panel.endSuggestion.dur} min → end <strong>{panel.endSuggestion.end}</strong>?</span>
+                      <span style={{fontSize:11,opacity:0.7}}>↵ to accept</span>
+                    </div>
+                  )}
                 </div>
 
                 {panel.loading && <div style={{textAlign:"center",padding:"10px 0",fontSize:13,color:"#888",fontStyle:"italic"}}>{panel.status||"Working…"}</div>}
