@@ -805,8 +805,8 @@ function pesticideHTML(job, weather, chem) {
 
   // Auto-calculate per-job fields from acreage
   const acres = parseFloat(job.acreage || job.miles || 0);
-  const gpa   = parseFloat(chem.gallonsPerAcre || 0);
-  const surf  = parseFloat(chem.surfactantPerAcre || 0);
+  const gpa   = parseFloat(chem.gallonsPerAcre   ?? 10);
+  const surf  = parseFloat(chem.surfactantPerAcre ?? 0.025);
   const ozRate = parseFloat((chem.ratePerAcre || "").match(/[\d.]+/)?.[0] || 0);
 
   const gallonsMixture = acres && gpa  ? (acres * gpa).toFixed(2) + " gal" : (chem.gallonsMixture || "");
