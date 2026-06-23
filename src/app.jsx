@@ -866,14 +866,16 @@ function openPrint(html) {
 // ── Shared components ─────────────────────────────────────────────────────────
 function Tabs({ tabs, active, onChange }) {
   return (
-    <div style={{display:"flex",borderBottom:"2px solid #2d5a1b",marginBottom:24,gap:2,flexWrap:"wrap"}}>
+    <div style={{display:"flex",background:"#e8f0e2",borderRadius:10,marginBottom:24,gap:3,flexWrap:"wrap",padding:4}}>
       {tabs.map(t => (
         <button key={t} onClick={() => onChange(t)} style={{
-          padding:"8px 18px", border:"none", fontSize:13,
-          fontWeight: active===t ? 700 : 400,
-          background: active===t ? "#2d5a1b" : "#e8f0e2",
-          color: active===t ? "#fff" : "#2d5a1b",
-          borderRadius:"6px 6px 0 0"
+          padding:"9px 20px", border:"none", fontSize:13, flex:"1 0 auto",
+          fontWeight: active===t ? 700 : 500,
+          background: active===t ? "#2d5a1b" : "transparent",
+          color: active===t ? "#fff" : "#3d6b28",
+          borderRadius:7,
+          boxShadow: active===t ? "0 2px 6px rgba(45,90,27,.3)" : "none",
+          letterSpacing:.2
         }}>{t}</button>
       ))}
     </div>
@@ -885,10 +887,11 @@ function ListPicker({ value, onChange, counts }) {
     <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
       {LISTS.map(l => (
         <button key={l} onClick={() => onChange(l)} style={{
-          padding:"6px 14px", border:"1.5px solid #2d5a1b", borderRadius:5,
+          padding:"7px 15px", border: value===l ? "1.5px solid #2d5a1b" : "1.5px solid #d3e3c4", borderRadius:20,
           background: value===l ? "#2d5a1b" : "#fff",
-          color: value===l ? "#fff" : "#2d5a1b",
-          fontWeight: value===l ? 700 : 400, fontSize:12
+          color: value===l ? "#fff" : "#3d6b28",
+          fontWeight: value===l ? 700 : 500, fontSize:12,
+          boxShadow: value===l ? "0 2px 6px rgba(45,90,27,.25)" : "none"
         }}>{l}{counts ? ` (${counts[l]||0})` : ""}</button>
       ))}
     </div>
@@ -1233,6 +1236,8 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs, allP
                     padding:"10px 14px", borderRadius:7, cursor:"pointer",
                     border:`1.5px solid ${isActive?"#2d5a1b":inLog?"#b5d4a0":"#e0e0e0"}`,
                     background: isActive?"#2d5a1b":inLog?"#f4faf0":"#fff",
+                    boxShadow: isActive?"0 2px 8px rgba(45,90,27,.25)":"none",
+                    transition:"background .15s ease, border-color .15s ease, box-shadow .15s ease",
                   }}>
                     <div style={{fontWeight:600,fontSize:13,color:isActive?"#fff":"#1a1a1a"}}>
                       {job.code && <span style={{fontWeight:400,fontSize:11,marginRight:6,opacity:0.7}}>{job.code}</span>}{job.name}
@@ -1368,7 +1373,7 @@ function LogsTab({ completedLogs, setCompletedLogs }) {
       {shown.length===0 && <p style={{color:"#aaa",fontSize:13}}>No logs saved yet.</p>}
       <div style={{display:"flex",flexDirection:"column",gap:8}}>
         {shown.map(log => (
-          <div key={log.id} style={{border:"1px solid #ddd",borderRadius:8,background:"#fff",overflow:"hidden"}}>
+          <div key={log.id} style={{border:"1px solid #e5e5e5",borderRadius:9,background:"#fff",overflow:"hidden",boxShadow:"0 1px 4px rgba(0,0,0,.04)"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 16px",gap:12}}>
               <div style={{flex:1,cursor:"pointer"}} onClick={() => toggle(log.id)}>
                 <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
@@ -1491,21 +1496,21 @@ function App() {
   );
 
   return (
-    <div style={{minHeight:"100vh",background:"#f2f5ee",fontFamily:"Georgia,serif"}}>
-      <div style={{background:"#2d5a1b",padding:"14px 28px",display:"flex",alignItems:"center",gap:14}}>
-        <span style={{fontSize:26}}>🌿</span>
+    <div style={{minHeight:"100vh",background:"#f2f5ee",fontFamily:"'Source Serif 4',Georgia,serif"}}>
+      <div style={{background:"linear-gradient(135deg,#2d5a1b,#3d7526)",padding:"16px 28px",display:"flex",alignItems:"center",gap:14,boxShadow:"0 2px 10px rgba(0,0,0,.15)"}}>
+        <span style={{fontSize:28}}>🌿</span>
         <div>
-          <div style={{color:"#fff",fontSize:17,fontWeight:700}}>Spray Log Generator</div>
-          <div style={{color:"#b5d4a0",fontSize:11}}>City of Tulsa / Stormwater Maintenance — Hydromulch Plus of Oklahoma</div>
+          <div style={{color:"#fff",fontSize:18,fontWeight:700,letterSpacing:.2}}>Spray Log Generator</div>
+          <div style={{color:"#c9e3b5",fontSize:11.5}}>City of Tulsa / Stormwater Maintenance — Hydromulch Plus of Oklahoma</div>
         </div>
-        <div style={{marginLeft:"auto",display:"flex",gap:16,fontSize:12,color:"#b5d4a0"}}>
-          <span>📋 {totalJobs} jobs</span>
-          <span>📄 {completedLogs.length} saved</span>
+        <div style={{marginLeft:"auto",display:"flex",gap:10,fontSize:12,color:"#fff"}}>
+          <span style={{background:"rgba(255,255,255,.15)",padding:"5px 12px",borderRadius:20,fontWeight:600}}>📋 {totalJobs} jobs</span>
+          <span style={{background:"rgba(255,255,255,.15)",padding:"5px 12px",borderRadius:20,fontWeight:600}}>📄 {completedLogs.length} saved</span>
         </div>
       </div>
       <div style={{maxWidth:980,margin:"24px auto",padding:"0 16px"}}>
         <Tabs tabs={["Jobs","Saved Logs","Chemicals"]} active={tab} onChange={setTab} />
-        <div style={{background:"#fff",borderRadius:10,padding:26,boxShadow:"0 2px 12px rgba(0,0,0,.07)"}}>
+        <div style={{background:"#fff",borderRadius:12,padding:26,boxShadow:"0 4px 18px rgba(45,90,27,.08)",border:"1px solid #e8f0e2"}}>
           {tab==="Jobs"       && <JobsTab jobLists={jobLists} chemDefaults={chemDefaults} completedLogs={completedLogs} setCompletedLogs={setCompletedLogs} allPending={allPending} setAllPending={setAllPending} />}
           {tab==="Saved Logs" && <LogsTab completedLogs={completedLogs} setCompletedLogs={setCompletedLogs} />}
           {tab==="Chemicals"  && <ChemTab chemDefaults={chemDefaults} setChemDefaults={setChemDefaults} />}
