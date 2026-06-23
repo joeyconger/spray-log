@@ -4,11 +4,23 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Spray Log Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
   *, *::before, *::after { box-sizing: border-box; }
-  body { margin: 0; font-family: Georgia, serif; background: #f2f5ee; }
-  input, button, textarea { font-family: inherit; }
-  button { cursor: pointer; }
+  body { margin: 0; font-family: 'Source Serif 4', Georgia, serif; background: #f2f5ee; -webkit-font-smoothing: antialiased; }
+  input, button, textarea, select { font-family: 'Inter', Arial, sans-serif; }
+  button { cursor: pointer; transition: filter .15s ease, transform .1s ease, box-shadow .15s ease; }
+  button:hover:not(:disabled) { filter: brightness(1.08); }
+  button:active:not(:disabled) { transform: scale(.97); }
+  button:disabled { cursor: not-allowed; opacity: .6; }
+  input, textarea, select { transition: border-color .15s ease, box-shadow .15s ease; }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: #5a8a3a !important; box-shadow: 0 0 0 3px rgba(90,138,58,.15); }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #c7d9bb; border-radius: 6px; }
+  ::-webkit-scrollbar-thumb:hover { background: #aac393; }
 </style>
 </head>
 <body>
