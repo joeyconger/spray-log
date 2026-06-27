@@ -1467,10 +1467,18 @@ function App() {
   const totalJobs = Object.values(jobLists).flat().length;
 
   useEffect(() => {
+    // Push whatever this browser already has up to the server immediately —
+    // guarantees logged jobs survive a storage-backend switch (e.g. enabling Postgres)
+    // without waiting on the next edit to trigger the debounced sync.
+    let localLogs = [];
+    try { localLogs = JSON.parse(localStorage.getItem("spraylog_logs") || "[]"); } catch {}
+    if (localLogs.length) api.put('/api/logs', localLogs);
+
     api.get('/api/all').then(data => {
       if (data) {
         if (data.chemDefaults && Object.keys(data.chemDefaults).length) setChemDefaults(data.chemDefaults);
-        if (data.logs?.length)                                          setCompletedLogs(data.logs);
+        // Never let stale/fewer server logs overwrite logs already saved in this browser
+        if (data.logs?.length && !localLogs.length)                     setCompletedLogs(data.logs);
         // Always use hard-coded TAC 100; merge other lists from server
         if (data.jobLists) {
           setJobLists(prev => ({ ...data.jobLists, "TAC 100": TAC_100_JOBS, "TAC 295 Big Spray": [...TAC_295_BIG_ACQUISITION_LOTS, ...TAC_295_BIG_DETENTION_PONDS, ...TAC_295_BIG_EARTHEN_CHANNELS, ...TAC_295_BIG_LINED_CHANNELS], "TAC 295 Small Spray": TAC_295_SMALL_JOBS, "Trails": TRAILS_JOBS, "Parks": PARKS_JOBS }));
