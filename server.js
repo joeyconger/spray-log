@@ -15,7 +15,7 @@ console.log('__dirname:', __dirname);
 app.use(express.json({ limit: '2mb' }));
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
-let load, save;
+let getKey, setKey, loadAll;
 
 if (process.env.DATABASE_URL) {
   const { Pool } = require('pg');
@@ -25,47 +25,57 @@ if (process.env.DATABASE_URL) {
   });
 
   const ready = pool.query(
-    'CREATE TABLE IF NOT EXISTS app_data (id INT PRIMARY KEY, data JSONB NOT NULL)'
+    'CREATE TABLE IF NOT EXISTS kv (key TEXT PRIMARY KEY, value JSONB NOT NULL)'
   ).then(() => console.log('Postgres ready')).catch(e => console.error('Postgres init error', e));
 
-  load = async () => {
+  // Each key lives in its own row with its own atomic upsert, so concurrent
+  // writes to different keys can never clobber each other (no read-modify-write
+  // of a shared blob).
+  getKey = async (key, fallback) => {
     await ready;
     try {
-      const r = await pool.query('SELECT data FROM app_data WHERE id = 1');
-      return r.rows[0]?.data || {};
-    } catch (e) { console.error('load error', e); return {}; }
+      const r = await pool.query('SELECT value FROM kv WHERE key = $1', [key]);
+      return r.rows[0]?.value ?? fallback;
+    } catch (e) { console.error('getKey error', e); return fallback; }
   };
 
-  save = async (data) => {
+  setKey = async (key, val) => {
     await ready;
     try {
       await pool.query(
-        'INSERT INTO app_data (id, data) VALUES (1, $1) ON CONFLICT (id) DO UPDATE SET data = $1',
-        [data]
+        'INSERT INTO kv (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = $2',
+        [key, val]
       );
-    } catch (e) { console.error('save error', e); }
+    } catch (e) { console.error('setKey error', e); }
+  };
+
+  loadAll = async (keys) => {
+    await ready;
+    try {
+      const r = await pool.query('SELECT key, value FROM kv WHERE key = ANY($1)', [keys]);
+      const out = {};
+      r.rows.forEach(row => { out[row.key] = row.value; });
+      return out;
+    } catch (e) { console.error('loadAll error', e); return {}; }
   };
 } else {
   const DATA_FILE = fs.existsSync('/data') ? '/data/data.json' : path.join(__dirname, 'data.json');
   console.log('No DATABASE_URL — falling back to file storage at', DATA_FILE);
 
-  load = async () => {
-    try { return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')); } catch { return {}; }
-  };
+  const readFile = () => { try { return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')); } catch { return {}; } };
+  const writeFile = (d) => { try { fs.writeFileSync(DATA_FILE, JSON.stringify(d)); } catch (e) { console.error('save error', e); } };
 
-  save = async (data) => {
-    try { fs.writeFileSync(DATA_FILE, JSON.stringify(data)); } catch (e) { console.error('save error', e); }
-  };
+  getKey = async (key, fallback) => readFile()[key] ?? fallback;
+  setKey = async (key, val) => { const d = readFile(); d[key] = val; writeFile(d); };
+  loadAll = async (keys) => { const d = readFile(); const out = {}; keys.forEach(k => { if (k in d) out[k] = d[k]; }); return out; };
 }
-
-async function getKey(key, fallback) { const d = await load(); return d[key] ?? fallback; }
-async function setKey(key, val) { const d = await load(); d[key] = val; await save(d); }
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 app.get('/api/all', async (req, res) => {
-  const d = await load();
   const lists = ['TAC 100', 'TAC 295 Big Spray', 'TAC 295 Small Spray', 'Trails', 'Parks'];
+  const pendingKeys = lists.map(l => 'pending-' + l);
+  const d = await loadAll(['job-lists', 'chem-defaults', 'logs', ...pendingKeys]);
   const pending = {};
   lists.forEach(l => { pending[l] = d['pending-' + l] || []; });
   res.json({ jobLists: d['job-lists'] || {}, chemDefaults: d['chem-defaults'] || {}, logs: d['logs'] || [], pending });
