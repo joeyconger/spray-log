@@ -559,18 +559,18 @@ const TAC_100_JOBS = [
   {code:"34",name:"36th St. N. & Hwy 169, Mingo Channel (Bottom only)",address:"",miles:"",linearFeet:"",acreage:"21.38"},
   {code:"35",name:"Mingo Main stem Pine to I-244 (Bottom only)",address:"",miles:"",linearFeet:"",acreage:"55"},
   {code:"36",name:"Mingo Mainstem -  from Pine N. to RR bridge",address:"",miles:"",linearFeet:"",acreage:"20.86"},
-  {code:"37",name:"Mingo Channel 2nd and Mingo Bridge to 21 st",address:"",miles:"",linearFeet:"",acreage:"28.86"},
-  {code:"38",name:"1250 N Mingo Lower Mingo Tribs",address:"",miles:"",linearFeet:"",acreage:"1.1"},
-  {code:"39",name:"5600 N Elgin Valley View Channel from",address:"",miles:"",linearFeet:"",acreage:"6.23"},
+  {code:"37",name:"Mingo Channel 2nd and Mingo Bridge to 21st - flow line only Toe of the slope",address:"",miles:"",linearFeet:"",acreage:"28.86"},
+  {code:"38",name:"1250 N Mingo Lower Mingo Tribs - flow line and non mowable areas only",address:"",miles:"",linearFeet:"",acreage:"1.1"},
+  {code:"39",name:"5600 N Elgin Valley View Channel from 56th St. North to Underground.",address:"",miles:"",linearFeet:"",acreage:"6.23"},
   {code:"40",name:"11700 E Archer cooley creek riprap",address:"",miles:"",linearFeet:"",acreage:"1.05"},
   {code:"41",name:"10759 E Admiral - riprap in safety training center",address:"",miles:"",linearFeet:"",acreage:"5"},
-  {code:"42",name:"Mingo Mainstrem Riprap from mingo road",address:"",miles:"",linearFeet:"",acreage:"1"},
-  {code:"43",name:"Mingo Mainstrem Riprap and Fabrimform",address:"",miles:"",linearFeet:"",acreage:"9.05"},
+  {code:"42",name:"Mingo Mainstrem Riprap from mingo road to 11th St south.",address:"",miles:"",linearFeet:"",acreage:"1"},
+  {code:"43",name:"Mingo Mainstrem Riprap and Fabrimform from 11st to 21 st south",address:"",miles:"",linearFeet:"",acreage:"9.05"},
   {code:"44",name:"2800 S 132 E Ave- Brookhollow channel riprap",address:"",miles:"",linearFeet:"",acreage:"5.5"},
-  {code:"45",name:"3100 S 118 E Ave - riprap in creek on the north",address:"",miles:"",linearFeet:"",acreage:"4"},
-  {code:"46",name:"3100 S Garnett - riprap North of shopping centers",address:"",miles:"",linearFeet:"",acreage:"2.5"},
-  {code:"47",name:"Bell Creek 3900 S 89 E Ave riprap areas from the BA",address:"",miles:"",linearFeet:"",acreage:"3.5"},
-  {code:"48",name:"Mingo Mainstem - 4100 S 103 E Ave - riprap thru",address:"",miles:"",linearFeet:"",acreage:"5"},
+  {code:"45",name:"3100 S 118 E Ave - riprap in creek on the north and West side of the detention pond",address:"",miles:"",linearFeet:"",acreage:"4"},
+  {code:"46",name:"3100 S Garnett - riprap North of shopping centers east and west side of Garnett",address:"",miles:"",linearFeet:"",acreage:"2.5"},
+  {code:"47",name:"Bell Creek 3900 S 89 E Ave riprap areas from the BA to mingo mainstem",address:"",miles:"",linearFeet:"",acreage:"3.5"},
+  {code:"48",name:"Mingo Mainstem - 4100 S 103 E Ave - riprap thru the moblie home park.",address:"",miles:"",linearFeet:"",acreage:"5"},
   {code:"49",name:"Bell Creek 46TH St. south to Aaronson Park.",address:"",miles:"",linearFeet:"",acreage:"3"},
   {code:"50",name:"Mingo Mainstream Riprap west of mingo RD.",address:"",miles:"",linearFeet:"",acreage:"2.5"},
   {code:"51",name:"Lil Haikey - 9100 S 89 E Ave - fabriform and trickle trail",address:"",miles:"",linearFeet:"",acreage:"4"},
@@ -578,9 +578,9 @@ const TAC_100_JOBS = [
   {code:"53",name:"Fred Creek 7400 S harvard east of harvard",address:"",miles:"",linearFeet:"",acreage:"4"},
   {code:"54",name:"Fred Creek 7400 S Harvard Lined Channel West of harvard",address:"",miles:"",linearFeet:"",acreage:"5.04"},
   {code:"55",name:"Fred Creek 8100 S Wheeling",address:"",miles:"",linearFeet:"",acreage:"1.59"},
-  {code:"56",name:"5100 S Lynn Lane from 4800 S to 5100 S on the west",address:"",miles:"",linearFeet:"",acreage:"1.51"},
-  {code:"57",name:"520 E 56th St N - Valley view 56th St N South to 48th PL",address:"",miles:"",linearFeet:"",acreage:"6"},
-  {code:"58",name:"500 S Mingo - Tupelo creek east of Mingo rd",address:"",miles:"",linearFeet:"",acreage:"6"},
+  {code:"56",name:"5100 S Lynn Lane from 4800 S to 5100 S on the west side of the road.",address:"",miles:"",linearFeet:"",acreage:"1.51"},
+  {code:"57",name:"520 E 56th St N - Valley view 56th St N South to 48th PL North.",address:"",miles:"",linearFeet:"",acreage:"6"},
+  {code:"58",name:"500 S Mingo - Tupelo creek east of Mingo rd to HWY 169",address:"",miles:"",linearFeet:"",acreage:"6"},
   {code:"59",name:"101st Delaware Dr. (School)",address:"",miles:"",linearFeet:"",acreage:"1.1"},
   {code:"60",name:"9800 S. Delaware Dr.",address:"",miles:"",linearFeet:"",acreage:"2.1"},
   {code:"61",name:"Vensel Creek - 97 S. Delaware",address:"",miles:"",linearFeet:"",acreage:"5.5"},
@@ -1467,10 +1467,18 @@ function App() {
   const totalJobs = Object.values(jobLists).flat().length;
 
   useEffect(() => {
+    // Push whatever this browser already has up to the server immediately —
+    // guarantees logged jobs survive a storage-backend switch (e.g. enabling Postgres)
+    // without waiting on the next edit to trigger the debounced sync.
+    let localLogs = [];
+    try { localLogs = JSON.parse(localStorage.getItem("spraylog_logs") || "[]"); } catch {}
+    if (localLogs.length) api.put('/api/logs', localLogs);
+
     api.get('/api/all').then(data => {
       if (data) {
         if (data.chemDefaults && Object.keys(data.chemDefaults).length) setChemDefaults(data.chemDefaults);
-        if (data.logs?.length)                                          setCompletedLogs(data.logs);
+        // Never let stale/fewer server logs overwrite logs already saved in this browser
+        if (data.logs?.length && !localLogs.length)                     setCompletedLogs(data.logs);
         // Always use hard-coded TAC 100; merge other lists from server
         if (data.jobLists) {
           setJobLists(prev => ({ ...data.jobLists, "TAC 100": TAC_100_JOBS, "TAC 295 Big Spray": [...TAC_295_BIG_ACQUISITION_LOTS, ...TAC_295_BIG_DETENTION_PONDS, ...TAC_295_BIG_EARTHEN_CHANNELS, ...TAC_295_BIG_LINED_CHANNELS], "TAC 295 Small Spray": TAC_295_SMALL_JOBS, "Trails": TRAILS_JOBS, "Parks": PARKS_JOBS }));
