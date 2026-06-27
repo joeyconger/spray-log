@@ -42,9 +42,12 @@ if (process.env.DATABASE_URL) {
   setKey = async (key, val) => {
     await ready;
     try {
+      // JSON-encode ourselves: pg's driver serializes plain JS arrays using
+      // Postgres array syntax (not JSON array syntax), which is invalid for
+      // a jsonb column. Passing a string sidesteps that auto-detection.
       await pool.query(
-        'INSERT INTO kv (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = $2',
-        [key, val]
+        'INSERT INTO kv (key, value) VALUES ($1, $2::jsonb) ON CONFLICT (key) DO UPDATE SET value = $2::jsonb',
+        [key, JSON.stringify(val)]
       );
     } catch (e) { console.error('setKey error', e); }
   };
