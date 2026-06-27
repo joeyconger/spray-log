@@ -619,12 +619,15 @@ function useLS(key, init, apiPath) {
   });
   const timer = useRef(null);
   const set = useCallback(v => {
-    setVal(v);
-    try { localStorage.setItem(key, JSON.stringify(v)); } catch {}
-    if (apiPath) {
-      clearTimeout(timer.current);
-      timer.current = setTimeout(() => api.put(apiPath, v), 500);
-    }
+    setVal(prev => {
+      const next = typeof v === 'function' ? v(prev) : v;
+      try { localStorage.setItem(key, JSON.stringify(next)); } catch {}
+      if (apiPath) {
+        clearTimeout(timer.current);
+        timer.current = setTimeout(() => api.put(apiPath, next), 500);
+      }
+      return next;
+    });
   }, [key, apiPath]);
   return [val, set];
 }
