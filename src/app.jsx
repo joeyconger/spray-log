@@ -520,6 +520,14 @@ const PARKS_JOBS = [
   {code:"",name:"8921 S Mingo",address:"",miles:"",linearFeet:"",acreage:"0.75"},
   {code:"",name:"7924 E 89th Ct",address:"",miles:"",linearFeet:"",acreage:"2.30"},
   {code:"",name:"7954 S 78th E Ave",address:"",miles:"",linearFeet:"",acreage:"2.20"},
+  {code:"",name:"5600 N Cincinnati",address:"",miles:"",linearFeet:"",acreage:"1.86"},
+  {code:"",name:"4100 N Lewis",address:"",miles:"",linearFeet:"",acreage:"0.79"},
+  {code:"",name:"5606 N Frankfort",address:"",miles:"",linearFeet:"",acreage:"1.6"},
+  {code:"",name:"5501 N MLK",address:"",miles:"",linearFeet:"",acreage:"1.55"},
+  {code:"",name:"1624 E 36th St N",address:"",miles:"",linearFeet:"",acreage:"1.96"},
+  {code:"",name:"3611 N Quaker E Ave",address:"",miles:"",linearFeet:"",acreage:"0.97"},
+  {code:"",name:"1720 E 36th St N",address:"",miles:"",linearFeet:"",acreage:"1.65"},
+  {code:"",name:"4300 E 36th St N",address:"",miles:"",linearFeet:"",acreage:"0.72"},
 ];
 
 const TAC_100_JOBS = [
