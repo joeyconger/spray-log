@@ -976,15 +976,15 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs, allP
   );
 
   const pendingIdxs = new Set(pending.map(e => e.jobIdx));
-  const available = jobs.filter((j, idx) => !pendingIdxs.has(idx));
+  const unlogged = jobs.filter((j, idx) => !loggedNames.has(j.name) && !pendingIdxs.has(idx));
 
   const searchLower = search.toLowerCase();
   const filtered = search.trim()
-    ? available.filter(j =>
+    ? unlogged.filter(j =>
         j.name?.toLowerCase().includes(searchLower) ||
         j.code?.toLowerCase().includes(searchLower) ||
         j.address?.toLowerCase().includes(searchLower))
-    : available;
+    : unlogged;
 
   const sorted = [...pending].sort((a,b) => a.jobIdx - b.jobIdx);
 
@@ -1234,8 +1234,18 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs, allP
             <input value={search} onChange={e => setSearch(e.target.value)}
               placeholder="Search by name, code, or address…"
               style={{width:"100%",padding:"8px 12px",border:"1px solid #ccc",borderRadius:7,fontSize:13,marginBottom:8}} />
-            <div style={{fontSize:11,color:"#aaa",marginBottom:6}}>
-              {available.length - loggedNames.size > 0 ? `${available.length - loggedNames.size} remaining` : "All logged ✓"}{loggedNames.size > 0 ? ` · ${loggedNames.size} logged` : ""} · click to log
+            <div style={{fontSize:11,color:"#aaa",marginBottom:6,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <span>{filtered.length} remaining{loggedNames.size > 0 ? ` · ${loggedNames.size} logged` : ""} · click to log</span>
+              {loggedNames.size > 0 && (
+                <button onClick={() => {
+                  if (confirm(`Reset ${listName} cycle? This will remove logged history for this list so all jobs reappear. Your saved log entries are kept.`)) {
+                    setCompletedLogs(completedLogs.filter(l => l.listName !== listName));
+                    setPending([]);
+                  }
+                }} style={{fontSize:11,padding:"3px 10px",background:"none",border:"1px solid #c0392b",color:"#c0392b",borderRadius:5,cursor:"pointer",fontWeight:600}}>
+                  ↺ Reset Cycle
+                </button>
+              )}
             </div>
             <div style={{display:"flex",flexDirection:"column",gap:4,maxHeight:520,overflowY:"auto",paddingRight:4}}>
               {filtered.map((job, fi) => {
@@ -1250,9 +1260,8 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs, allP
                     boxShadow: isActive?"0 2px 8px rgba(45,90,27,.25)":"none",
                     transition:"background .15s ease, border-color .15s ease, box-shadow .15s ease",
                   }}>
-                    <div style={{fontWeight:600,fontSize:13,color:isActive?"#fff":"#1a1a1a",display:"flex",alignItems:"center",gap:6}}>
-                      {job.code && <span style={{fontWeight:400,fontSize:11,opacity:0.7}}>{job.code}</span>}{job.name}
-                      {loggedNames.has(job.name) && !isActive && <span style={{fontSize:10,background:"#d4edda",color:"#2d6a4f",borderRadius:4,padding:"1px 5px",fontWeight:600,flexShrink:0}}>✓ logged</span>}
+                    <div style={{fontWeight:600,fontSize:13,color:isActive?"#fff":"#1a1a1a"}}>
+                      {job.code && <span style={{fontWeight:400,fontSize:11,marginRight:6,opacity:0.7}}>{job.code}</span>}{job.name}
                     </div>
                     <div style={{fontSize:11,color:isActive?"#b5d4a0":"#999",marginTop:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
                       {job.address}{job.miles?` · ${job.miles} mi`:""}{job.acreage?` · ${job.acreage} ac`:""}
