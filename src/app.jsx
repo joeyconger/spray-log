@@ -1234,8 +1234,18 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs, allP
             <input value={search} onChange={e => setSearch(e.target.value)}
               placeholder="Search by name, code, or address…"
               style={{width:"100%",padding:"8px 12px",border:"1px solid #ccc",borderRadius:7,fontSize:13,marginBottom:8}} />
-            <div style={{fontSize:11,color:"#aaa",marginBottom:6}}>
-              {filtered.length} remaining{loggedNames.size > 0 ? ` · ${loggedNames.size} logged` : ""} · click to log
+            <div style={{fontSize:11,color:"#aaa",marginBottom:6,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <span>{filtered.length} remaining{loggedNames.size > 0 ? ` · ${loggedNames.size} logged` : ""} · click to log</span>
+              {loggedNames.size > 0 && (
+                <button onClick={() => {
+                  if (confirm(`Reset ${listName} cycle? This will remove logged history for this list so all jobs reappear. Your saved log entries are kept.`)) {
+                    setCompletedLogs(completedLogs.filter(l => l.listName !== listName));
+                    setPending([]);
+                  }
+                }} style={{fontSize:11,padding:"3px 10px",background:"none",border:"1px solid #c0392b",color:"#c0392b",borderRadius:5,cursor:"pointer",fontWeight:600}}>
+                  ↺ Reset Cycle
+                </button>
+              )}
             </div>
             <div style={{display:"flex",flexDirection:"column",gap:4,maxHeight:520,overflowY:"auto",paddingRight:4}}>
               {filtered.map((job, fi) => {
