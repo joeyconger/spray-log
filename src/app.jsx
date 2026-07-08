@@ -976,15 +976,15 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs, allP
   );
 
   const pendingIdxs = new Set(pending.map(e => e.jobIdx));
-  const unlogged = jobs.filter((j, idx) => !loggedNames.has(j.name) && !pendingIdxs.has(idx));
+  const available = jobs.filter((j, idx) => !pendingIdxs.has(idx));
 
   const searchLower = search.toLowerCase();
   const filtered = search.trim()
-    ? unlogged.filter(j =>
+    ? available.filter(j =>
         j.name?.toLowerCase().includes(searchLower) ||
         j.code?.toLowerCase().includes(searchLower) ||
         j.address?.toLowerCase().includes(searchLower))
-    : unlogged;
+    : available;
 
   const sorted = [...pending].sort((a,b) => a.jobIdx - b.jobIdx);
 
@@ -1235,7 +1235,7 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs, allP
               placeholder="Search by name, code, or address…"
               style={{width:"100%",padding:"8px 12px",border:"1px solid #ccc",borderRadius:7,fontSize:13,marginBottom:8}} />
             <div style={{fontSize:11,color:"#aaa",marginBottom:6}}>
-              {filtered.length} remaining{loggedNames.size > 0 ? ` · ${loggedNames.size} logged` : ""} · click to log
+              {available.length - loggedNames.size > 0 ? `${available.length - loggedNames.size} remaining` : "All logged ✓"}{loggedNames.size > 0 ? ` · ${loggedNames.size} logged` : ""} · click to log
             </div>
             <div style={{display:"flex",flexDirection:"column",gap:4,maxHeight:520,overflowY:"auto",paddingRight:4}}>
               {filtered.map((job, fi) => {
@@ -1250,8 +1250,9 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs, allP
                     boxShadow: isActive?"0 2px 8px rgba(45,90,27,.25)":"none",
                     transition:"background .15s ease, border-color .15s ease, box-shadow .15s ease",
                   }}>
-                    <div style={{fontWeight:600,fontSize:13,color:isActive?"#fff":"#1a1a1a"}}>
-                      {job.code && <span style={{fontWeight:400,fontSize:11,marginRight:6,opacity:0.7}}>{job.code}</span>}{job.name}
+                    <div style={{fontWeight:600,fontSize:13,color:isActive?"#fff":"#1a1a1a",display:"flex",alignItems:"center",gap:6}}>
+                      {job.code && <span style={{fontWeight:400,fontSize:11,opacity:0.7}}>{job.code}</span>}{job.name}
+                      {loggedNames.has(job.name) && !isActive && <span style={{fontSize:10,background:"#d4edda",color:"#2d6a4f",borderRadius:4,padding:"1px 5px",fontWeight:600,flexShrink:0}}>✓ logged</span>}
                     </div>
                     <div style={{fontSize:11,color:isActive?"#b5d4a0":"#999",marginTop:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
                       {job.address}{job.miles?` · ${job.miles} mi`:""}{job.acreage?` · ${job.acreage} ac`:""}
