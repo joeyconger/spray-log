@@ -725,7 +725,7 @@ async function getWeather(lat, lon, dateStr, timeStr) {
   const base = past
     ? "https://archive-api.open-meteo.com/v1/archive"
     : "https://api.open-meteo.com/v1/forecast";
-  const url = `${base}?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,windspeed_10m,winddirection_10m,cloudcover&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=America%2FChicago&start_date=${dateStr}&end_date=${dateStr}`;
+  const url = `${base}?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,windspeed_10m,winddirection_10m,cloudcover&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=America%2FChicago&start_date=${dateStr}&end_date=${dateStr}${past?"&models=best_match":""}`;
   const r = await fetch(url);
   if (!r.ok) throw new Error("Weather API " + r.status);
   const d = await r.json();
@@ -909,17 +909,42 @@ function ListPicker({ value, onChange, counts }) {
   );
 }
 
-function WeatherBox({ weather }) {
+function WeatherBox({ weather, onChange }) {
   if (!weather) return null;
   const icon = weather.sky==="Clear" ? "☀️" : weather.sky==="Partly Cloudy" ? "⛅" : "☁️";
+  const inp = {padding:"4px 6px",border:"1px solid #b5d4a0",borderRadius:4,fontSize:13,fontWeight:600,background:"#fff",width:"100%"};
   return (
     <div style={{background:"#e8f0e2",border:"1px solid #b5d4a0",borderRadius:7,padding:"10px 14px",marginBottom:14}}>
-      <div style={{fontSize:11,fontWeight:700,color:"#2d5a1b",marginBottom:8,textTransform:"uppercase",letterSpacing:.5}}>Weather Conditions</div>
+      <div style={{fontSize:11,fontWeight:700,color:"#2d5a1b",marginBottom:8,textTransform:"uppercase",letterSpacing:.5}}>Weather Conditions <span style={{fontWeight:400,opacity:.6,textTransform:"none",letterSpacing:0}}>(edit if needed)</span></div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"6px 12px",fontSize:13}}>
-        <div><span style={{color:"#888",fontSize:11,display:"block"}}>Sky</span><strong>{icon} {weather.sky}</strong></div>
-        <div><span style={{color:"#888",fontSize:11,display:"block"}}>Temp</span><strong>{weather.temp}°F</strong></div>
-        <div><span style={{color:"#888",fontSize:11,display:"block"}}>Wind</span><strong>{weather.wind} mph</strong></div>
-        <div><span style={{color:"#888",fontSize:11,display:"block"}}>Direction</span><strong>{weather.windDir}</strong></div>
+        <div>
+          <span style={{color:"#888",fontSize:11,display:"block"}}>Sky</span>
+          {onChange
+            ? <select value={weather.sky} onChange={e => onChange({...weather, sky:e.target.value})} style={{...inp}}>
+                <option>Clear</option><option>Partly Cloudy</option><option>Cloudy</option>
+              </select>
+            : <strong>{icon} {weather.sky}</strong>}
+        </div>
+        <div>
+          <span style={{color:"#888",fontSize:11,display:"block"}}>Temp °F</span>
+          {onChange
+            ? <input type="number" value={weather.temp} onChange={e => onChange({...weather, temp:parseInt(e.target.value)||0})} style={{...inp}} />
+            : <strong>{weather.temp}°F</strong>}
+        </div>
+        <div>
+          <span style={{color:"#888",fontSize:11,display:"block"}}>Wind mph</span>
+          {onChange
+            ? <input type="number" value={weather.wind} onChange={e => onChange({...weather, wind:parseInt(e.target.value)||0})} style={{...inp}} />
+            : <strong>{weather.wind} mph</strong>}
+        </div>
+        <div>
+          <span style={{color:"#888",fontSize:11,display:"block"}}>Direction</span>
+          {onChange
+            ? <select value={weather.windDir} onChange={e => onChange({...weather, windDir:e.target.value})} style={{...inp}}>
+                {["N","NE","E","SE","S","SW","W","NW"].map(d => <option key={d}>{d}</option>)}
+              </select>
+            : <strong>{weather.windDir}</strong>}
+        </div>
       </div>
     </div>
   );
@@ -1100,7 +1125,7 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs, allP
       try {
         const past = new Date(d+"T12:00:00") < new Date();
         const base = past ? "https://archive-api.open-meteo.com/v1/archive" : "https://api.open-meteo.com/v1/forecast";
-        const url = `${base}?latitude=36.154&longitude=-95.993&hourly=temperature_2m,windspeed_10m,winddirection_10m,cloudcover&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=America%2FChicago&start_date=${d}&end_date=${d}`;
+        const url = `${base}?latitude=36.154&longitude=-95.993&hourly=temperature_2m,windspeed_10m,winddirection_10m,cloudcover&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=America%2FChicago&start_date=${d}&end_date=${d}${past?"&models=best_match":""}`;
         const r = await fetch(url);
         const data = await r.json();
         weatherByDate[d] = data.hourly;
@@ -1333,7 +1358,7 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs, allP
                   <p style={{fontSize:12,margin:"0 0 12px",color:panel.status.startsWith("✅")?"#2d5a1b":"#c0392b"}}>{panel.status}</p>
                 )}
 
-                {panel.weather && <WeatherBox weather={panel.weather} />}
+                {panel.weather && <WeatherBox weather={panel.weather} onChange={w => setPanel(p => ({...p, weather:w}))} />}
 
                 {!panel.weather && !panel.loading && (
                   <button onClick={doFetch} disabled={!canFetch} style={{
