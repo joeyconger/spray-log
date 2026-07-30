@@ -717,28 +717,41 @@ async function geocode(address) {
   return { lat: 36.154, lon: -95.993 };
 }
 
+// Tulsa is CDT (UTC-5) Apr-Oct, CST (UTC-6) Nov-Mar.
+// We request data in UTC and offset the hour index ourselves — more reliable
+// than trusting the API's timezone conversion, which seems to be ignored.
+function localToUtcHour(localHour, dateStr) {
+  const month = parseInt(dateStr.slice(5, 7));
+  const offsetHours = (month >= 3 && month <= 11) ? 5 : 6; // CDT=+5, CST=+6
+  return localHour + offsetHours;
+}
+
 async function getWeather(lat, lon, dateStr, timeStr) {
-  const h = parseHour(timeStr);
-  const cacheKey = `${lat.toFixed(3)},${lon.toFixed(3)},${dateStr},${h}`;
+  const localH = parseHour(timeStr);
+  const utcH   = localToUtcHour(localH, dateStr);
+  const cacheKey = `${lat.toFixed(3)},${lon.toFixed(3)},${dateStr},${localH}`;
   if (weatherCache.has(cacheKey)) return weatherCache.get(cacheKey);
 
-  const dateMs = new Date(dateStr+"T12:00:00").getTime();
-  const nowMs  = Date.now();
-  const daysAgo = (nowMs - dateMs) / 86400000;
+  const daysAgo = (Date.now() - new Date(dateStr+"T12:00:00").getTime()) / 86400000;
 
-  // Forecast API stores ~90 days of history using high-res models (HRRR for US, 3km).
-  // Archive API uses ERA5 (31km global reanalysis) — less accurate for surface temps.
-  // Use forecast API for recent dates, archive only for older history.
-  let url;
-  if (daysAgo < 0) {
-    // future
-    url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,windspeed_10m,winddirection_10m,cloudcover&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=America%2FChicago&start_date=${dateStr}&end_date=${dateStr}`;
-  } else if (daysAgo <= 85) {
-    // recent past — use forecast API historical cache (HRRR/GFS, much more accurate for US)
-    url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,windspeed_10m,winddirection_10m,cloudcover&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=America%2FChicago&start_date=${dateStr}&end_date=${dateStr}`;
+  // Use UTC (no timezone param) so we control the index ourselves.
+  // Forecast API for recent dates (HRRR/GFS, 3km); archive for older (ERA5).
+  let url, h;
+  if (daysAgo <= 85) {
+    // If utcH >= 24 we've crossed into the next UTC day — fetch that day instead
+    const fetchDate = utcH >= 24
+      ? new Date(dateStr+"T00:00:00Z").toISOString().slice(0,10).replace(/(\d+)-(\d+)-(\d+)/, (_,y,m,d) => {
+          const dt = new Date(Date.UTC(+y,+m-1,+d+1)); return dt.toISOString().slice(0,10);
+        })
+      : dateStr;
+    h = utcH % 24;
+    url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,windspeed_10m,winddirection_10m,cloudcover&temperature_unit=fahrenheit&windspeed_unit=mph&start_date=${fetchDate}&end_date=${fetchDate}`;
   } else {
-    // older history — use archive (ERA5)
-    url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,windspeed_10m,winddirection_10m,cloudcover&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=America%2FChicago&start_date=${dateStr}&end_date=${dateStr}&models=best_match`;
+    h = utcH % 24;
+    const fetchDate = utcH >= 24
+      ? (() => { const dt = new Date(dateStr+"T00:00:00Z"); dt.setUTCDate(dt.getUTCDate()+1); return dt.toISOString().slice(0,10); })()
+      : dateStr;
+    url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,windspeed_10m,winddirection_10m,cloudcover&temperature_unit=fahrenheit&windspeed_unit=mph&start_date=${fetchDate}&end_date=${fetchDate}&models=best_match`;
   }
 
   const r = await fetch(url);
@@ -1134,14 +1147,15 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs, allP
     const weatherByDate = {};
     const degToDir = deg => { const dirs=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW']; return dirs[Math.round(deg/22.5)%16]; };
     const skyFromCloud = cc => cc < 25 ? "Clear" : cc < 60 ? "Partly Cloudy" : "Overcast";
-    const parseHour12 = t => { if (!t) return 10; const m=t.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i); if(!m)return 10; let h=parseInt(m[1]); const ap=(m[3]||"").toUpperCase(); if(ap==="PM"&&h!==12)h+=12; if(ap==="AM"&&h===12)h=0; return h; };
+    const parseHour12 = (t, isoDate) => { if (!t) return 10; const m=t.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i); if(!m)return 10; let h=parseInt(m[1]); const ap=(m[3]||"").toUpperCase(); if(ap==="PM"&&h!==12)h+=12; if(ap==="AM"&&h===12)h=0; return localToUtcHour(h, isoDate||"2026-07-01") % 24; };
 
     for (const d of uniqueDates) {
       try {
         const daysAgo = (Date.now() - new Date(d+"T12:00:00").getTime()) / 86400000;
         const base = daysAgo > 85 ? "https://archive-api.open-meteo.com/v1/archive" : "https://api.open-meteo.com/v1/forecast";
         const extra = daysAgo > 85 ? "&models=best_match" : "";
-        const url = `${base}?latitude=36.154&longitude=-95.993&hourly=temperature_2m,windspeed_10m,winddirection_10m,cloudcover&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=America%2FChicago&start_date=${d}&end_date=${d}${extra}`;
+        // No timezone param — we offset hour index ourselves in parseHour12 below
+        const url = `${base}?latitude=36.154&longitude=-95.993&hourly=temperature_2m,windspeed_10m,winddirection_10m,cloudcover&temperature_unit=fahrenheit&windspeed_unit=mph&start_date=${d}&end_date=${d}${extra}`;
         const r = await fetch(url);
         const data = await r.json();
         weatherByDate[d] = data.hourly;
@@ -1153,7 +1167,7 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs, allP
     // Build pending entries and add to queue
     const newEntries = parsed.map((e, i) => {
       const hw = weatherByDate[e.isoDate];
-      const hour = parseHour12(e.timeStart);
+      const hour = parseHour12(e.timeStart, e.isoDate);
       let weather = {sky:"", temp:"", wind:"", windDir:""};
       if (hw) {
         weather = {
