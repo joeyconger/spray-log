@@ -651,7 +651,8 @@ function parseHour(t) {
   let h = parseInt(m[1]);
   const ap = (m[3]||"").toUpperCase();
   if (ap==="PM" && h!==12) h+=12;
-  if (ap==="AM" && h===12) h=0;
+  else if (ap==="AM" && h===12) h=0;
+  else if (!ap && h >= 1 && h <= 6) h+=12; // no AM/PM: 1-6 assumed PM (workday hours)
   return Math.min(Math.max(h,0),23);
 }
 
