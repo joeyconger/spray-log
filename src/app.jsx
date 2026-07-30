@@ -722,11 +722,25 @@ async function getWeather(lat, lon, dateStr, timeStr) {
   const cacheKey = `${lat.toFixed(3)},${lon.toFixed(3)},${dateStr},${h}`;
   if (weatherCache.has(cacheKey)) return weatherCache.get(cacheKey);
 
-  const past = new Date(dateStr+"T12:00:00") < new Date();
-  const base = past
-    ? "https://archive-api.open-meteo.com/v1/archive"
-    : "https://api.open-meteo.com/v1/forecast";
-  const url = `${base}?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,windspeed_10m,winddirection_10m,cloudcover&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=America%2FChicago&start_date=${dateStr}&end_date=${dateStr}${past?"&models=best_match":""}`;
+  const dateMs = new Date(dateStr+"T12:00:00").getTime();
+  const nowMs  = Date.now();
+  const daysAgo = (nowMs - dateMs) / 86400000;
+
+  // Forecast API stores ~90 days of history using high-res models (HRRR for US, 3km).
+  // Archive API uses ERA5 (31km global reanalysis) — less accurate for surface temps.
+  // Use forecast API for recent dates, archive only for older history.
+  let url;
+  if (daysAgo < 0) {
+    // future
+    url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,windspeed_10m,winddirection_10m,cloudcover&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=America%2FChicago&start_date=${dateStr}&end_date=${dateStr}`;
+  } else if (daysAgo <= 85) {
+    // recent past — use forecast API historical cache (HRRR/GFS, much more accurate for US)
+    url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,windspeed_10m,winddirection_10m,cloudcover&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=America%2FChicago&start_date=${dateStr}&end_date=${dateStr}`;
+  } else {
+    // older history — use archive (ERA5)
+    url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,windspeed_10m,winddirection_10m,cloudcover&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=America%2FChicago&start_date=${dateStr}&end_date=${dateStr}&models=best_match`;
+  }
+
   const r = await fetch(url);
   if (!r.ok) throw new Error("Weather API " + r.status);
   const d = await r.json();
@@ -1124,9 +1138,10 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs, allP
 
     for (const d of uniqueDates) {
       try {
-        const past = new Date(d+"T12:00:00") < new Date();
-        const base = past ? "https://archive-api.open-meteo.com/v1/archive" : "https://api.open-meteo.com/v1/forecast";
-        const url = `${base}?latitude=36.154&longitude=-95.993&hourly=temperature_2m,windspeed_10m,winddirection_10m,cloudcover&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=America%2FChicago&start_date=${d}&end_date=${d}${past?"&models=best_match":""}`;
+        const daysAgo = (Date.now() - new Date(d+"T12:00:00").getTime()) / 86400000;
+        const base = daysAgo > 85 ? "https://archive-api.open-meteo.com/v1/archive" : "https://api.open-meteo.com/v1/forecast";
+        const extra = daysAgo > 85 ? "&models=best_match" : "";
+        const url = `${base}?latitude=36.154&longitude=-95.993&hourly=temperature_2m,windspeed_10m,winddirection_10m,cloudcover&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=America%2FChicago&start_date=${d}&end_date=${d}${extra}`;
         const r = await fetch(url);
         const data = await r.json();
         weatherByDate[d] = data.hourly;
