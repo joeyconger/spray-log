@@ -491,6 +491,15 @@ const TAC_295_SMALL_JOBS = [
   {code:"1136",name:"710 S Trenton",address:"710 S Trenton",miles:"",linearFeet:"",acreage:"0.25"},
   {code:"1149",name:"2620 E 22nd St",address:"2620 E 22nd St",miles:"",linearFeet:"",acreage:"0.25"},
   {code:"1150",name:"3908 S Evanston",address:"3908 S Evanston",miles:"",linearFeet:"",acreage:"0.25"},
+  {code:"",name:"10400 S Granite",address:"10400 S Granite",miles:"",linearFeet:"",acreage:""},
+  {code:"",name:"10300 S Yale",address:"10300 S Yale",miles:"",linearFeet:"",acreage:""},
+  {code:"",name:"9700 S Yale",address:"9700 S Yale",miles:"",linearFeet:"",acreage:""},
+  {code:"",name:"4502 S Galveston",address:"4502 S Galveston",miles:"",linearFeet:"",acreage:""},
+  {code:"",name:"2800 S Cincinnati",address:"2800 S Cincinnati",miles:"",linearFeet:"",acreage:""},
+  {code:"",name:"3948 S Troost",address:"3948 S Troost",miles:"",linearFeet:"",acreage:""},
+  {code:"",name:"1700 S Detroit",address:"1700 S Detroit",miles:"",linearFeet:"",acreage:""},
+  {code:"",name:"5700 W Edison",address:"5700 W Edison",miles:"",linearFeet:"",acreage:""},
+  {code:"",name:"11000 S Yale",address:"11000 S Yale",miles:"",linearFeet:"",acreage:""},
 ];
 
 const PARKS_JOBS = [
