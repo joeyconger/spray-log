@@ -500,6 +500,21 @@ const TAC_295_SMALL_JOBS = [
   {code:"",name:"1700 S Detroit",address:"1700 S Detroit",miles:"",linearFeet:"",acreage:""},
   {code:"",name:"5700 W Edison",address:"5700 W Edison",miles:"",linearFeet:"",acreage:""},
   {code:"",name:"11000 S Yale",address:"11000 S Yale",miles:"",linearFeet:"",acreage:""},
+  {code:"",name:"1500 S 115th E Ave",address:"1500 S 115th E Ave",miles:"",linearFeet:"",acreage:"14.57"},
+  {code:"",name:"6100 S 108th E Ave",address:"6100 S 108th E Ave",miles:"",linearFeet:"",acreage:"19"},
+  {code:"",name:"6100 S 110th E Ave",address:"6100 S 110th E Ave",miles:"",linearFeet:"",acreage:"3.4"},
+  {code:"",name:"6300 S 109th E Ave",address:"6300 S 109th E Ave",miles:"",linearFeet:"",acreage:"2.68"},
+  {code:"",name:"4100 S 124th E Ave",address:"4100 S 124th E Ave",miles:"",linearFeet:"",acreage:"8.67"},
+  {code:"",name:"7400 S 87th E Ave",address:"7400 S 87th E Ave",miles:"",linearFeet:"",acreage:"4.8"},
+  {code:"",name:"7400 S 88th E Ave",address:"7400 S 88th E Ave",miles:"",linearFeet:"",acreage:"5.1"},
+  {code:"",name:"7400 S 89th E Ave",address:"7400 S 89th E Ave",miles:"",linearFeet:"",acreage:"5.2"},
+  {code:"",name:"2100 S 101st E Ave",address:"2100 S 101st E Ave",miles:"",linearFeet:"",acreage:"11.47",isDuplicate:true},
+  {code:"",name:"4100 S 118th E Ave",address:"4100 S 118th E Ave",miles:"",linearFeet:"",acreage:"8",isDuplicate:true},
+  {code:"",name:"2400 S Garnett (additional)",address:"2400 S Garnett",miles:"",linearFeet:"",acreage:"8.56",isDuplicate:true},
+  {code:"",name:"600 S Mingo (additional)",address:"600 S Mingo",miles:"",linearFeet:"",acreage:"6.7",isDuplicate:true},
+  {code:"",name:"6400 S 89th E Ave (additional)",address:"6400 S 89th E Ave",miles:"",linearFeet:"",acreage:"1",isDuplicate:true},
+  {code:"",name:"1101 W Pine (additional)",address:"1101 W Pine",miles:"",linearFeet:"",acreage:"17.5",isDuplicate:true},
+  {code:"",name:"6600 S 90th (additional)",address:"6600 S 90th E Ave",miles:"",linearFeet:"",acreage:"6.02",isDuplicate:true},
 ];
 
 const PARKS_JOBS = [
@@ -1324,8 +1339,9 @@ function JobsTab({ jobLists, chemDefaults, completedLogs, setCompletedLogs, allP
                     boxShadow: isActive?"0 2px 8px rgba(45,90,27,.25)":"none",
                     transition:"background .15s ease, border-color .15s ease, box-shadow .15s ease",
                   }}>
-                    <div style={{fontWeight:600,fontSize:13,color:isActive?"#fff":"#1a1a1a"}}>
-                      {job.code && <span style={{fontWeight:400,fontSize:11,marginRight:6,opacity:0.7}}>{job.code}</span>}{job.name}
+                    <div style={{fontWeight:600,fontSize:13,color:isActive?"#fff":"#1a1a1a",display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
+                      {job.code && <span style={{fontWeight:400,fontSize:11,opacity:0.7}}>{job.code}</span>}{job.name}
+                      {job.isDuplicate && !isActive && <span style={{fontSize:10,background:"#fff3cd",color:"#856404",border:"1px solid #ffc107",borderRadius:4,padding:"1px 5px",fontWeight:600,flexShrink:0}}>⚠ same address as another job</span>}
                     </div>
                     <div style={{fontSize:11,color:isActive?"#b5d4a0":"#999",marginTop:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
                       {job.address}{job.miles?` · ${job.miles} mi`:""}{job.acreage?` · ${job.acreage} ac`:""}
